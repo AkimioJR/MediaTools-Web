@@ -6,3 +6,4 @@ export * from "./useDialog";
 export * from "./useGlobalDialogs";
 export * from "./useThemeManager";
 export * from "./useLogDialog";
+export * from "./setings";
