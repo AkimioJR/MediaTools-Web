@@ -1,2 +1,3 @@
-export * from "@/types/storage";
-export * from "@/types/media";
+export * from "./storage";
+export * from "./media";
+export * from "./config";
