@@ -39,7 +39,7 @@ export function useThemeManager() {
 
     currentThemeConfig.value =
       themeModes.find((t) => t.value === mode) || themeModes[0]; // 更新当前主题配置信息
-    theme.global.name.value = mode; // 设置Vuetify主题
+    theme.change(mode); // 设置Vuetify主题
   };
 
   // 切换到下一个主题
@@ -55,7 +55,7 @@ export function useThemeManager() {
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   const handleSystemThemeChange = (e: MediaQueryListEvent) => {
     if (themeMode.value === "system") {
-      theme.global.name.value = e.matches ? "dark" : "light";
+      theme.change(e.matches ? "dark" : "light");
     }
   };
 
