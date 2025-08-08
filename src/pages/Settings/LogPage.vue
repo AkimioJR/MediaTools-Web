@@ -16,7 +16,9 @@
       clearable
     />
   </template>
-  <v-btn color="primary" class="mt-4" @click="updateData"> 更新日志配置 </v-btn>
+  <div class="d-flex justify-end mt-4">
+    <v-btn color="primary" @click="updateData">保存配置</v-btn>
+  </div>
 </template>
 
 <script lang="ts" setup name="LogPage">
