@@ -1,20 +1,25 @@
 <template>
   <template v-if="fanartConfig">
-    <v-text-field
-      v-model="fanartConfig.api_url"
-      label="Fanart API 地址（v3）"
-      class="mb-4"
-      clearable
-      placeholder="https://webservice.fanart.tv"
-    />
-
-    <v-text-field
-      v-model="fanartConfig.api_key"
-      label="Fanart API 密钥"
-      class="mb-4"
-      clearable
-      placeholder="请输入您的 Fanart API Key"
-    />
+    <v-row class="mb-4">
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="fanartConfig.api_url"
+          label="Fanart API 地址（v3）"
+          class="mb-4"
+          clearable
+          placeholder="https://webservice.fanart.tv"
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-text-field
+          v-model="fanartConfig.api_key"
+          label="Fanart API 密钥"
+          class="mb-4"
+          clearable
+          placeholder="请输入您的 Fanart API Key"
+        />
+      </v-col>
+    </v-row>
 
     <v-select
       v-model="fanartConfig.languages"
