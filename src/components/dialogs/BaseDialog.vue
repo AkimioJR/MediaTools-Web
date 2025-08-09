@@ -5,15 +5,10 @@
     :scrollable="scrollable"
     :persistent="persistent"
     :retain-focus="false"
-    :fullscreen="fullscreen"
   >
     <v-card>
       <!-- 标题栏 -->
-      <v-card-title
-        v-if="showTitle"
-        class="d-flex align-center"
-        :class="titleClass"
-      >
+      <v-card-title v-if="showTitle" class="d-flex align-center">
         <slot name="title">
           <span>{{ title }}</span>
         </slot>
@@ -30,7 +25,7 @@
       </v-card-title>
 
       <!-- 内容区域 -->
-      <v-card-text :class="contentClass" :style="contentStyle">
+      <v-card-text>
         <slot />
       </v-card-text>
     </v-card>
@@ -41,44 +36,30 @@
 import { computed } from "vue";
 
 interface Props {
-  visible: boolean;
-  title?: string;
-  maxWidth?: string | number;
-  scrollable?: boolean;
-  persistent?: boolean;
-  fullscreen?: boolean;
-  loading?: boolean;
+  visible: boolean; // 是否可见
+  title?: string; // 标题
+  maxWidth?: number; // 最大宽度
+  scrollable?: boolean; // 是否可滚动
+  persistent?: boolean; // 是否持久化
 
   // 标题栏
   showTitle?: boolean;
   showCloseButton?: boolean;
-  titleClass?: string;
-
-  // 内容区域
-  contentClass?: string;
-  contentStyle?: string;
 }
 
 interface Emits {
   (e: "update:visible", value: boolean): void;
   (e: "close"): void;
-  (e: "confirm"): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: "",
-  maxWidth: "600",
+  maxWidth: 600,
   scrollable: false,
   persistent: false,
-  fullscreen: false,
-  loading: false,
 
   showTitle: true,
   showCloseButton: true,
-  titleClass: "",
-
-  contentClass: "",
-  contentStyle: "",
 });
 
 const emit = defineEmits<Emits>();
@@ -91,9 +72,7 @@ const localVisible = computed({
 
 // 事件处理
 const handleClose = () => {
-  if (!props.loading) {
-    localVisible.value = false;
-    emit("close");
-  }
+  localVisible.value = false;
+  emit("close");
 };
 </script>
