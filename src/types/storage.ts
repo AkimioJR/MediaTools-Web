@@ -1,6 +1,6 @@
 export interface StorageProviderInterface {
   storage_type: string;
-  transerfer_type: string;
+  transfer_type: string[];
 }
 
 export interface FileInfo {
