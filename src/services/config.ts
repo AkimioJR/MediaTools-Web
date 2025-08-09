@@ -30,13 +30,13 @@ export const configService = {
     return await api.post("/config/fanart", config);
   },
 
-  async getMediaLibraryConfig(): Promise<LibraryConfig[]> {
-    return await api.get("/config/media/library");
+  async getMediaLibrariesConfig(): Promise<LibraryConfig[]> {
+    return await api.get("/config/media/libraries");
   },
-  async updateMediaLibraryConfig(
+  async updateMediaLibrariesConfig(
     libraries: LibraryConfig[]
   ): Promise<LibraryConfig[]> {
-    return await api.post("/config/media/library", libraries);
+    return await api.post("/config/media/libraries", libraries);
   },
 
   async getMediaFormatConfig(): Promise<FormatConfig> {
