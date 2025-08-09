@@ -80,22 +80,11 @@ const handleAction = (action: HeaderAction) => {
   switch (action.action) {
     case Action.MediRecognition: // 触发媒体识别事件
       console.log("打开媒体识别对话框");
-      openMediaRecognitionDialog({
-        onSuccess(data: MediaItem) {
-          console.log("媒体识别成功:", data);
-        },
-        onClose() {
-          console.log("媒体识别对话框已关闭");
-        },
-      });
+      openMediaRecognitionDialog();
       break;
     case Action.ViewLogs: // 触发查看日志事件
       console.log("打开日志对话框");
-      openLogDialog({
-        onClose() {
-          console.log("日志对话框已关闭");
-        },
-      });
+      openLogDialog();
       break;
     case Action.ThemeSwitch: //  触发切换主题事件
       toggleTheme();
