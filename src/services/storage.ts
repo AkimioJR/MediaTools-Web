@@ -24,6 +24,17 @@ export const StorageService = {
     });
   },
 
+  async Rename(
+    storage_type: string,
+    path: string,
+    new_name: string
+  ): Promise<FileInfo> {
+    return await api.post(`/storage/${storage_type}/rename`, {
+      path,
+      new_name,
+    });
+  },
+
   async Delete(storage_type: string, path: string): Promise<FileInfo> {
     return await api.delete(`/storage/${storage_type}/delete`, {
       data: { path },
