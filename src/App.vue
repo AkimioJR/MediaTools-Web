@@ -42,6 +42,14 @@
           active-class="primary--text bg-blue-lighten-5"
           rounded="xl"
         />
+
+        <v-list-item
+          prepend-icon="mdi-cog"
+          title="系统设置"
+          :to="{ name: 'Settings' }"
+          active-class="primary--text bg-blue-lighten-5"
+          rounded="xl"
+        />
       </v-list>
 
       <!-- 底部空间填充 -->
