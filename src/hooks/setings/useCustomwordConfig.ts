@@ -1,6 +1,7 @@
 import { configService } from "@/services";
 import { type CustomWordConfig } from "@/types";
 import { computed, ref } from "vue";
+import { showError } from "@/utils";
 
 export const useCustomWordConfig = () => {
   const customWordConfig = ref<CustomWordConfig | null>(null);
@@ -11,7 +12,15 @@ export const useCustomWordConfig = () => {
 
   const updateData = async () => {
     if (customWordConfig.value !== null) {
-      return await configService.updateCustomWordConfig(customWordConfig.value);
+      try {
+        return await configService.updateCustomWordConfig(
+          customWordConfig.value
+        );
+      } catch (error) {
+        showError(
+          "保存配置失败，请检查配置是否正确: " + (error as Error).message
+        );
+      }
     }
   };
 

@@ -1,6 +1,7 @@
 import { configService } from "@/services";
 import { type FormatConfig } from "@/types";
 import { ref } from "vue";
+import { showError } from "@/utils";
 
 export const useMediaFormatConfig = () => {
   const formatConfig = ref<FormatConfig | null>(null);
@@ -11,7 +12,13 @@ export const useMediaFormatConfig = () => {
 
   const updateData = async () => {
     if (formatConfig.value !== null) {
-      return await configService.updateMediaFormatConfig(formatConfig.value);
+      try {
+        return await configService.updateMediaFormatConfig(formatConfig.value);
+      } catch (error) {
+        showError(
+          "保存配置失败，请检查配置是否正确: " + (error as Error).message
+        );
+      }
     }
   };
 
