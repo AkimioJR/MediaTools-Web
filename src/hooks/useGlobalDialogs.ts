@@ -1,16 +1,12 @@
 import { ref, reactive } from "vue";
 
-/**
- * 弹窗类型枚举
- */
+// 弹窗类型枚举
 export enum DialogType {
   MEDIA_RECOGNITION = "media-recognition", // 识别媒体弹窗
   LOG = "log", // 日志弹窗
 }
 
-/**
- * 弹窗配置接口
- */
+// 弹窗配置接口
 export interface DialogConfig {
   type: DialogType; // 弹窗类型
   visible: boolean; // 弹窗是否可见
@@ -18,9 +14,7 @@ export interface DialogConfig {
   data?: any; // 弹窗数据
 }
 
-/**
- * 弹窗事件处理器类型
- */
+// 弹窗事件处理器类型
 export interface DialogEventHandlers {
   onOpen?: () => void; // 打开事件处理器
   onSuccess?: (data: any) => void; // 成功事件处理器（点击了“确定”或“提交”）
@@ -31,9 +25,7 @@ export interface DialogEventHandlers {
 const globalActiveDialog = ref<DialogConfig | null>(null);
 const globalEventHandlers = reactive<DialogEventHandlers>({});
 
-/**
- * 全局弹窗管理 Hook
- */
+// 全局弹窗管理 Hook
 export function useGlobalDialogs() {
   /**
    * 打开弹窗

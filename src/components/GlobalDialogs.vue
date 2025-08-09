@@ -15,17 +15,6 @@
     v-bind="activeDialog?.props"
     @update:visible="handleVisibilityChange"
   />
-
-  <!-- 可以在这里添加其他类型的弹窗 -->
-  <!-- 
-  <UserProfileDialog
-    v-else-if="isUserProfileDialog"
-    v-model:visible="dialogVisible"
-    v-bind="activeDialog?.props"
-    @success="handleDialogSuccess"
-    @cancel="handleDialogCancel"
-  />
-  -->
 </template>
 
 <script lang="ts" setup>
@@ -61,9 +50,4 @@ const handleVisibilityChange = (visible: boolean) => {
     handleDialogClose();
   }
 };
-
-// 可以添加更多弹窗类型的计算属性
-// const isUserProfileDialog = computed(() =>
-//   activeDialog.value?.type === DialogType.USER_PROFILE
-// );
 </script>
