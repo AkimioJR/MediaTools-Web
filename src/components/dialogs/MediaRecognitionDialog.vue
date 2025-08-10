@@ -84,3 +84,18 @@ function closeFunction() {
   emit("update:visible", false);
 }
 </script>
+
+<style scoped>
+/* 确保按钮与输入框高度对齐 */
+.recognize-btn {
+  height: 56px !important; /* 与outlined text-field的默认高度匹配 */
+  min-width: 100px;
+  align-self: stretch; /* 让按钮填满容器高度 */
+  margin-left: 16px; /* 添加左边距来增加间距 */
+}
+
+/* 输入框容器对齐 */
+.d-flex.align-center {
+  align-items: flex-start; /* 从顶部对齐，而不是center */
+}
+</style>
