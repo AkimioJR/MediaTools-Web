@@ -2,7 +2,7 @@ export interface MediaItem {
   title: string; // 标题
   original_title: string; // 原始标题
   year: number; // 年份
-  media_type: string; // 电影、电视剧
+  media_type: "Movie" | "TV"; // 电影、电视剧
   part: string; // 分段
 
   file_extension: string; // 文件扩展名
