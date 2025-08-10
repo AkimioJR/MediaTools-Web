@@ -1,60 +1,38 @@
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 
-/**
- * 弹窗管理 Hook
- * @param options 配置选项
- * @returns 弹窗管理相关的状态和方法
- */
-export function useDialog(options?: {
-  onOpen?: () => void;
-  onClose?: () => void;
-  resetOnOpen?: boolean;
-}) {
+export function useDialog() {
   const visible = ref(false);
 
-  // 双向绑定的 visible 计算属性
-  const localVisible = computed({
+  // 创建一个可以直接用于 v-model 的 computed
+  const modelValue = computed({
     get: () => visible.value,
     set: (value: boolean) => {
       visible.value = value;
     },
   });
 
-  // 监听弹窗打开/关闭
-  watch(visible, (newVal, oldVal) => {
-    if (newVal && !oldVal) {
-      // 弹窗打开
-      if (options?.resetOnOpen && options?.onOpen) {
-        options.onOpen();
-      }
-    } else if (!newVal && oldVal) {
-      // 弹窗关闭
-      if (options?.onClose) {
-        options.onClose();
-      }
-    }
-  });
-
-  // 打开弹窗
-  const open = () => {
-    visible.value = true;
-  };
-
-  // 关闭弹窗
-  const close = () => {
-    visible.value = false;
-  };
-
-  // 切换弹窗状态
-  const toggle = () => {
-    visible.value = !visible.value;
-  };
-
   return {
-    visible,
-    localVisible,
-    open,
-    close,
-    toggle,
+    visible: modelValue, // 现在这个可以直接用于 v-model
+    show: () => {
+      console.log("打开对话框");
+      visible.value = true;
+    },
+    hide: () => {
+      console.log("关闭对话框");
+      visible.value = false;
+    },
+    toggle: () => {
+      console.log("切换对话框");
+      visible.value = !visible.value;
+    },
+    set: (value: boolean) => {
+      console.log("设置对话框可见性为: " + value);
+      visible.value = value;
+    },
   };
+}
+
+// 简化的 Dialog Emit 接口
+export interface DialogEmit {
+  (e: "update:visible", value: boolean): void;
 }
