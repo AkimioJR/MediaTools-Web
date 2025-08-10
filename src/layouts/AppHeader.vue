@@ -13,6 +13,7 @@
         :key="action.text"
         color="primary"
         @click="action.handler"
+        class="header-btn"
       >
         <v-icon>{{ action.icon }}</v-icon>
         <v-tooltip activator="parent" location="bottom">
@@ -45,5 +46,9 @@ const headerActions = computed<HeaderAction[]>(() => [
   },
 ]);
 </script>
-
-<style scoped></style>
+<style scoped>
+.header-btn {
+  width: 40px !important;
+  min-width: 40px !important;
+}
+</style>
