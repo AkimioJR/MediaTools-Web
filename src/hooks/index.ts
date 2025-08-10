@@ -7,3 +7,4 @@ export * from "./useGlobalDialogs";
 export * from "./useThemeManager";
 export * from "./useLogDialog";
 export * from "./setings";
+export * from "./useNavigationManager";
