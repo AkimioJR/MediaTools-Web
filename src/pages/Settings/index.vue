@@ -4,7 +4,6 @@
       <v-card elevation="2" class="mb-6">
         <v-tabs
           v-model="activeTab"
-          bg-color="white"
           color="primary"
           align-tabs="center"
           show-arrows
