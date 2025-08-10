@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="localVisible"
+    :model-value="visible"
     :max-width="maxWidth"
     :scrollable="scrollable"
     :persistent="persistent"
@@ -8,14 +8,13 @@
   >
     <v-card>
       <!-- 标题栏 -->
-      <v-card-title v-if="showTitle" class="d-flex align-center">
-        <slot name="title">
+      <v-card-title class="d-flex align-center">
+        <slot v-if="title" name="title">
           <span>{{ title }}</span>
         </slot>
         <v-spacer />
         <slot name="title-actions">
           <v-btn
-            v-if="showCloseButton"
             icon="mdi-close"
             variant="text"
             size="small"
@@ -32,29 +31,19 @@
   </v-dialog>
 </template>
 
-<script lang="ts" setup>
-import { computed } from "vue";
-
+<script lang="ts" setup name="BaseDialog">
 interface Props {
   visible: boolean; // 是否可见
   title?: string; // 标题
-  maxWidth?: number; // 最大宽度
+  maxWidth?: number | string; // 最大宽度
   scrollable?: boolean; // 是否可滚动
   persistent?: boolean; // 是否持久化
-
-  // 标题栏
-  showTitle?: boolean;
-  showCloseButton?: boolean;
-}
-
-interface Emits {
-  (e: "update:visible", value: boolean): void;
-  (e: "close"): void;
+  closeFunction?: () => void; // 关闭回调函数
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: "",
-  maxWidth: 600,
+  maxWidth: "auto",
   scrollable: false,
   persistent: false,
 
@@ -62,17 +51,10 @@ const props = withDefaults(defineProps<Props>(), {
   showCloseButton: true,
 });
 
-const emit = defineEmits<Emits>();
-
-// 双向绑定visible属性
-const localVisible = computed({
-  get: () => props.visible,
-  set: (value: boolean) => emit("update:visible", value),
-});
-
-// 事件处理
-const handleClose = () => {
-  localVisible.value = false;
-  emit("close");
-};
+// 当对话框关闭时，自动更新 visible 状态
+function handleClose() {
+  if (props.closeFunction) {
+    props.closeFunction();
+  }
+}
 </script>
