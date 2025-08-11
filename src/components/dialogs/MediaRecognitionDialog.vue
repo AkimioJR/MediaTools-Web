@@ -1,10 +1,5 @@
 <template>
-  <BaseDialog
-    v-model:visible="dialogVisible"
-    title="媒体识别"
-    max-width="800"
-    :close-function="closeFunction"
-  >
+  <BaseDialog v-model:visible="dialogVisible" title="媒体识别" max-width="800">
     <!-- 输入区域 -->
     <div class="d-flex align-center gap-3">
       <v-text-field
@@ -78,10 +73,6 @@ async function handleRecognize() {
   } finally {
     isLoading.value = false;
   }
-}
-
-function closeFunction() {
-  emit("update:visible", false);
 }
 </script>
 

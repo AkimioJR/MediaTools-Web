@@ -1,6 +1,7 @@
 <template>
   <v-dialog
     :model-value="visible"
+    @update:model-value="handleDialogUpdate"
     :max-width="maxWidth"
     :scrollable="scrollable"
     :persistent="persistent"
@@ -18,7 +19,7 @@
             icon="mdi-close"
             variant="text"
             size="small"
-            @click="handleClose"
+            @click="handleDialogUpdate(false)"
           />
         </slot>
       </v-card-title>
@@ -32,13 +33,14 @@
 </template>
 
 <script lang="ts" setup name="BaseDialog">
+import { defineProps, defineEmits, withDefaults } from "vue";
+import { type DialogEmit } from "@/hooks";
 interface Props {
   visible: boolean; // 是否可见
   title?: string; // 标题
   maxWidth?: number | string; // 最大宽度
   scrollable?: boolean; // 是否可滚动
   persistent?: boolean; // 是否持久化
-  closeFunction?: () => void; // 关闭回调函数
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -50,11 +52,9 @@ const props = withDefaults(defineProps<Props>(), {
   showTitle: true,
   showCloseButton: true,
 });
+const emit = defineEmits<DialogEmit>();
 
-// 当对话框关闭时，自动更新 visible 状态
-function handleClose() {
-  if (props.closeFunction) {
-    props.closeFunction();
-  }
+function handleDialogUpdate(visible: boolean) {
+  emit("update:visible", visible);
 }
 </script>
