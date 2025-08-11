@@ -22,14 +22,26 @@
       </v-btn>
     </div>
   </v-app-bar>
+  <MediaRecognitionDialog
+    :visible="mediaRecognitionDialog.visible.value"
+    @update:visible="mediaRecognitionDialog.visible.value = $event"
+  />
+  <LogDialog
+    :visible="logDialog.visible.value"
+    @update:visible="logDialog.visible.value = $event"
+  />
 </template>
 
 <script lang="ts" setup name="AppHeader">
+import MediaRecognitionDialog from "@/components/dialogs/MediaRecognitionDialog.vue";
+import LogDialog from "@/components/dialogs/LogDialog.vue";
 import { computed } from "vue";
-import { useNavigationManager, useThemeManager } from "@/hooks";
+import { useNavigationManager, useThemeManager, useDialog } from "@/hooks";
 
 const { toggleNavigation } = useNavigationManager();
 const { currentThemeConfig, toggleTheme } = useThemeManager();
+const mediaRecognitionDialog = useDialog();
+const logDialog = useDialog();
 
 // 按钮动作类型定义
 interface HeaderAction {
@@ -39,6 +51,16 @@ interface HeaderAction {
 }
 
 const headerActions = computed<HeaderAction[]>(() => [
+  {
+    text: "识别媒体",
+    icon: "mdi-text-recognition",
+    handler: mediaRecognitionDialog.show,
+  },
+  {
+    text: "查看日志",
+    icon: "mdi-file-document",
+    handler: logDialog.show,
+  },
   {
     text: currentThemeConfig.value.text,
     icon: currentThemeConfig.value.icon,
