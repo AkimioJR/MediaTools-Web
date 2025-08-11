@@ -1,5 +1,5 @@
 export interface LogDetail {
-  level: "info" | "warn" | "error";
+  level: "trace" | "debug" | "info" | "warning" | "error";
   message: string;
   time: string;
   caller: string;
