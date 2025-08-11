@@ -32,7 +32,6 @@ export function useDialog() {
   };
 }
 
-// 简化的 Dialog Emit 接口
 export interface DialogEmit {
-  (e: "update:visible", value: boolean): void;
+  "update:visible": [value: boolean];
 }
