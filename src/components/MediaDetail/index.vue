@@ -1,6 +1,6 @@
 <template>
   <!-- 成功结果 -->
-  <v-card v-if="mediaItem && mediaItem.title" class="elevation-1">
+  <v-card v-if="mediaItem && mediaItem.title" variant="flat">
     <v-card-title class="d-flex align-center bg-success py-2">
       <v-icon class="mr-2 text-white">{{
         isTV ? "mdi-television-classic" : "mdi-movie"
@@ -15,9 +15,9 @@
     <v-card-text class="pa-3">
       <v-row dense>
         <!-- 海报区域 -->
-        <Poster :mediaItem="mediaItem" />
+        <Poster :mediaItem="mediaItem" class="poster" />
 
-        <!-- 详细信息区域 -->
+        <!-- 信息区域 -->
         <v-col cols="12" md="9">
           <v-tabs v-model="activeTab" color="primary" class="mb-3">
             <v-tab value="basic">基本信息</v-tab>
@@ -84,5 +84,3 @@ const props = defineProps<{
 const activeTab = ref("basic");
 const isTV = computed(() => props.mediaItem?.media_type === "TV");
 </script>
-
-<style scoped></style>
