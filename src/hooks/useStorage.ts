@@ -42,7 +42,7 @@ export const useStorage = () => {
    */
   const loadProviders = async () => {
     try {
-      providers.value = await StorageService.ProviderList();
+      providers.value = await StorageService.ProviderService.getProviderList();
       if (providers.value.length > 0) {
         currentProvider.value = providers.value[0].storage_type;
         await loadFiles();

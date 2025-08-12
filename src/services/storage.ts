@@ -2,8 +2,10 @@ import api from "@/services/api";
 import { type StorageProviderInterface, type FileInfo } from "@/types";
 
 export const StorageService = {
-  async ProviderList(): Promise<StorageProviderInterface[]> {
-    return await api.get("/storage/list");
+  ProviderService: {
+    async getProviderList(): Promise<StorageProviderInterface[]> {
+      return await api.get("/storage/provider");
+    },
   },
 
   async CheckExists(storage_type: string, path: string): Promise<boolean> {
