@@ -281,7 +281,8 @@ const onDragEnd = () => {
 async function loadData() {
   loadingProviders.value = true;
   try {
-    storageProviderList.value = await StorageService.ProviderList();
+    storageProviderList.value =
+      await StorageService.ProviderService.getProviderList();
   } catch (error) {
     console.error("Failed to load storage providers:", error);
     storageProviderList.value = [];
