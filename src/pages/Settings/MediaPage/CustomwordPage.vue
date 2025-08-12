@@ -19,7 +19,6 @@
       <v-textarea
         v-model="identifyWordText"
         auto-grow
-        clearable
         rows="4"
         max-rows="10"
         outlined
