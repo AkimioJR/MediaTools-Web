@@ -1,17 +1,32 @@
 <template>
   <template v-if="logConfig">
-    <v-select
-      v-model="logConfig.level"
-      label="日志级别"
-      :items="logLevels"
-      item-title="label"
-      item-value="value"
-      class="mb-4"
-      clearable
-    />
+    <v-row class="mb-4">
+      <v-col cols="12" sm="6">
+        <v-select
+          v-model="logConfig.level"
+          label="控制台日志级别"
+          :items="logLevels"
+          item-title="label"
+          item-value="value"
+          class="mb-4"
+          clearable
+        />
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-select
+          v-model="logConfig.file_level"
+          label="文件日志级别"
+          :items="logLevels"
+          item-title="label"
+          item-value="value"
+          class="mb-4"
+          clearable
+        />
+      </v-col>
+    </v-row>
     <v-text-field
       v-model="logConfig.path"
-      label="日志路径"
+      label="日志文件目录"
       class="mb-4"
       clearable
     />
