@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col cols="12">
-      <v-card elevation="2" class="mb-6">
+      <v-card variant="flat" class="mb-6">
         <v-tabs
           v-model="activeTab"
           color="primary"
