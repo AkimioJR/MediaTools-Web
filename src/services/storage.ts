@@ -6,6 +6,26 @@ export const StorageService = {
     async getProviderList(): Promise<StorageProviderInterface[]> {
       return await api.get("/storage/provider");
     },
+
+    async getProvider(storage_type: string): Promise<StorageProviderInterface> {
+      return await api.get(`/storage/provider/${storage_type}`);
+    },
+
+    async updateProvider(
+      storage_type: string,
+      data: Record<string, string>
+    ): Promise<StorageProviderInterface> {
+      return await api.post("/storage/provider", {
+        storage_type,
+        data,
+      });
+    },
+
+    async deleteProvider(
+      storage_type: string
+    ): Promise<StorageProviderInterface> {
+      return await api.delete(`/storage/provider/${storage_type}`);
+    },
   },
 
   async CheckExists(storage_type: string, path: string): Promise<boolean> {
