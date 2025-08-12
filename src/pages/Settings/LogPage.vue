@@ -3,8 +3,8 @@
     <v-row class="mb-4">
       <v-col cols="12" sm="6">
         <v-select
-          v-model="logConfig.level"
-          label="控制台日志级别"
+          v-model="logConfig.console_level"
+          label="终端日志级别"
           :items="logLevels"
           item-title="label"
           item-value="value"
@@ -25,7 +25,7 @@
       </v-col>
     </v-row>
     <v-text-field
-      v-model="logConfig.path"
+      v-model="logConfig.file_dir"
       label="日志文件目录"
       class="mb-4"
       clearable

@@ -1,8 +1,8 @@
 // 日志配置接口
 export interface LogConfig {
-  level: string; // 控制台日志级别
+  console_level: string; // 控制台日志级别
   file_level: string; // 文件日志级别
-  path: string; // 日志文件目录
+  file_dir: string; // 日志文件目录
 }
 
 // TMDB 配置接口
