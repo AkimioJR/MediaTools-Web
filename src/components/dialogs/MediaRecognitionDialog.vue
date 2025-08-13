@@ -29,7 +29,7 @@
     <!-- 识别结果区域 -->
     <MediaDetail
       v-if="result || errMsg"
-      :mediaItem="result"
+      :mediaItem="result?.item || null"
       :errMsg="errMsg"
       class="mt-4"
     />
@@ -41,7 +41,7 @@ import BaseDialog from "./BaseDialog.vue";
 import MediaDetail from "@/components/MediaDetail/index.vue";
 
 import { defineProps, ref, defineEmits, computed } from "vue";
-import type { MediaItem } from "@/types";
+import type { RecognizeMediaResponse } from "@/types";
 import { RecognizeService } from "@/services";
 import { type DialogEmit } from "@/hooks";
 
@@ -57,7 +57,7 @@ const dialogVisible = computed({
 
 const mediaTitle = ref("");
 const isLoading = ref(false);
-const result = ref<MediaItem | null>(null);
+const result = ref<RecognizeMediaResponse | null>(null);
 const errMsg = ref<string | null>(null);
 
 async function handleRecognize() {
