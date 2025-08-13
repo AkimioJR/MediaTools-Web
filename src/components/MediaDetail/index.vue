@@ -50,6 +50,13 @@
         </v-col>
       </v-row>
     </v-card-text>
+    <v-divider />
+    <!-- 规则信息 -->
+    <RuleInfo
+      :meta_rule="mediaResp.meta_rule"
+      :custom_rule="mediaResp.custom_rule"
+      class="pa-3"
+    />
   </v-card>
 
   <!-- 错误结果 -->
@@ -76,6 +83,7 @@ import BaseInfo from "./BaseInfo.vue";
 import OverView from "./OverView.vue";
 import ResourceInfo from "./ResourceInfo.vue";
 import TVInfo from "./TVInfo.vue";
+import RuleInfo from "./RuleInfo.vue";
 
 const props = defineProps<{
   mediaResp: RecognizeMediaResponse | null;
