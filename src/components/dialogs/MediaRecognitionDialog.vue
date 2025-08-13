@@ -29,7 +29,7 @@
     <!-- 识别结果区域 -->
     <MediaDetail
       v-if="result || errMsg"
-      :mediaItem="result?.item || null"
+      :mediaResp="result"
       :errMsg="errMsg"
       class="mt-4"
     />

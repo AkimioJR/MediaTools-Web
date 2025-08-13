@@ -1,21 +1,21 @@
 <template>
   <!-- 成功结果 -->
-  <v-card v-if="mediaItem && mediaItem.title" variant="flat">
+  <v-card v-if="mediaResp && mediaResp.item.title" variant="flat">
     <v-card-title class="d-flex align-center bg-success py-2">
       <v-icon class="mr-2 text-white">{{
         isTV ? "mdi-television-classic" : "mdi-movie"
       }}</v-icon>
       <div class="text-white">
-        <div class="text-h6">{{ mediaItem.title }}</div>
+        <div class="text-h6">{{ mediaResp.item.title }}</div>
         <div class="text-caption">
-          {{ mediaItem.year }} | {{ mediaItem.media_type }}
+          {{ mediaResp.item.year }} | {{ mediaResp.item.media_type }}
         </div>
       </div>
     </v-card-title>
     <v-card-text class="pa-3">
       <v-row dense>
         <!-- 海报区域 -->
-        <Poster :mediaItem="mediaItem" class="poster" />
+        <Poster :mediaItem="mediaResp.item" class="poster" />
 
         <!-- 信息区域 -->
         <v-col cols="12" md="9">
@@ -29,22 +29,22 @@
           <v-tabs-window v-model="activeTab">
             <!-- 基本信息 -->
             <v-tabs-window-item value="basic">
-              <BaseInfo :mediaItem="mediaItem" :isTV="isTV" />
+              <BaseInfo :mediaItem="mediaResp.item" :isTV="isTV" />
             </v-tabs-window-item>
 
             <!-- 简介 -->
             <v-tabs-window-item value="overview">
-              <OverView :mediaItem="mediaItem" />
+              <OverView :mediaItem="mediaResp.item" />
             </v-tabs-window-item>
 
             <!-- 资源信息 -->
             <v-tabs-window-item value="resource">
-              <ResourceInfo :mediaItem="mediaItem" />
+              <ResourceInfo :mediaItem="mediaResp.item" />
             </v-tabs-window-item>
 
             <!-- 电视剧信息 -->
             <v-tabs-window-item v-if="isTV" value="tv">
-              <TVInfo :mediaItem="mediaItem" />
+              <TVInfo :mediaItem="mediaResp.item" />
             </v-tabs-window-item>
           </v-tabs-window>
         </v-col>
@@ -69,7 +69,7 @@
 <script lang="ts" setup name="MediaDetail">
 import { defineProps, ref, computed } from "vue";
 
-import type { MediaItem } from "@/types";
+import type { RecognizeMediaResponse } from "@/types";
 
 import Poster from "./Poster.vue";
 import BaseInfo from "./BaseInfo.vue";
@@ -78,9 +78,9 @@ import ResourceInfo from "./ResourceInfo.vue";
 import TVInfo from "./TVInfo.vue";
 
 const props = defineProps<{
-  mediaItem: MediaItem | null;
+  mediaResp: RecognizeMediaResponse | null;
   errMsg: string | null;
 }>();
 const activeTab = ref("basic");
-const isTV = computed(() => props.mediaItem?.media_type === "TV");
+const isTV = computed(() => props.mediaResp?.item.media_type === "TV");
 </script>
