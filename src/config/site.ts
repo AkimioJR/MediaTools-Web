@@ -1,30 +1,24 @@
 export type SiteConfig = typeof siteConfig
+import { Gauge, DatabaseZap, Cog } from 'lucide-react'
 
 export const siteConfig = {
   name: 'MediaTools',
   description: 'MediaTools',
   navMenuItems: [
     {
-      label: 'Dashboard',
+      label: '仪表盘',
       href: '/dashboard',
+      icon: Gauge,
     },
     {
-      label: 'Projects',
-      href: '/projects',
+      label: '存储管理',
+      href: '/storage',
+      icon: DatabaseZap,
     },
     {
-      label: 'Team',
-      href: '/team',
-    },
-    {
-      label: 'Calendar',
-      href: '/calendar',
-    },
-    {
-      label: 'Settings',
+      label: '系统设置',
       href: '/settings',
+      icon: Cog,
     },
-
-    ,
   ],
 }

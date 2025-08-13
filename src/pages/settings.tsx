@@ -1,11 +1,11 @@
 import { Card, CardBody } from '@heroui/card'
 
-export default function DashboardPage() {
+export default function SettingsPage() {
   return (
     <div className="p-6">
       <Card>
         <CardBody>
-          <p>仪表盘页面内容</p>
+          <p>系统设置页面内容</p>
         </CardBody>
       </Card>
     </div>

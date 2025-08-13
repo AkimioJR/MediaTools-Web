@@ -2,6 +2,7 @@ import { Wand2 } from 'lucide-react'
 
 import { useAppStore } from '@/stores/useAppStore'
 import { cn } from '@/utils/twUtils'
+import { SidebarMenus } from '@/components/sidebar-menus'
 
 export function Sidebar() {
   const { isOpenSidebar } = useAppStore()
@@ -25,7 +26,9 @@ export function Sidebar() {
             </div>
           </div>
         </div>
-        menus
+        <div className="flex-1 px-2">
+          <SidebarMenus />
+        </div>
       </div>
     </section>
   )
