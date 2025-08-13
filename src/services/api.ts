@@ -1,9 +1,8 @@
 import axios from "axios";
 
-export interface ApiResponse<T> {
+export interface ErrResponse {
   success: boolean;
   message: string;
-  data: T;
 }
 
 const api = axios.create({
@@ -14,20 +13,7 @@ const api = axios.create({
 // 响应拦截器 - 统一处理后端响应格式
 api.interceptors.response.use(
   (response) => {
-    // 如果响应类型是 blob，直接返回
-    if (response.config.responseType === "blob") {
-      return response.data;
-    }
-
-    const data = response.data as ApiResponse<any>;
-
-    // 如果后端返回 success: false，抛出错误
-    if (!data.success) {
-      throw new Error(data.message || "请求失败");
-    }
-
-    // 直接返回 data 字段，简化调用
-    return data.data;
+    return response.data;
   },
   (error) => {
     // 网络错误或其他错误
