@@ -1,3 +1,4 @@
+import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 
 export interface ApiResponse<T> {
@@ -13,13 +14,13 @@ const api = axios.create({
 
 // 响应拦截器 - 统一处理后端响应格式
 api.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse) => {
     // 如果响应类型是 blob，直接返回
     if (response.config.responseType === "blob") {
       return response.data;
     }
 
-    const data = response.data as ApiResponse<any>;
+    const data = response.data as ApiResponse<unknown>;
 
     // 如果后端返回 success: false，抛出错误
     if (!data.success) {
@@ -29,7 +30,7 @@ api.interceptors.response.use(
     // 直接返回 data 字段，简化调用
     return data.data;
   },
-  (error) => {
+  (error: AxiosError<{ message?: string }>) => {
     // 网络错误或其他错误
     const message =
       error.response?.data?.message || error.message || "网络错误";
