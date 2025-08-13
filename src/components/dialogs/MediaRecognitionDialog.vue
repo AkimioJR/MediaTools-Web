@@ -42,7 +42,7 @@ import MediaDetail from "@/components/MediaDetail/index.vue";
 
 import { defineProps, ref, defineEmits, computed } from "vue";
 import type { MediaItem } from "@/types";
-import { MediaService } from "@/services";
+import { RecognizeService } from "@/services";
 import { type DialogEmit } from "@/hooks";
 
 const props = defineProps<{
@@ -65,7 +65,7 @@ async function handleRecognize() {
   result.value = null;
 
   try {
-    result.value = await MediaService.Recognize(mediaTitle.value);
+    result.value = await RecognizeService.RecognizeMedia(mediaTitle.value);
   } catch (error) {
     result.value = null;
     errMsg.value = (error as Error).message;
