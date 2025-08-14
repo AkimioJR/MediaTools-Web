@@ -14,7 +14,7 @@ export default function SettingsPage() {
   // 使用 tabsOnly 模式，工具栏不显示统计与按钮
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 space-y-6">
       {/* 页面工具栏（含 Tabs） */}
       <PageToolbar
         tabsOnly
@@ -63,8 +63,8 @@ function LogSettings() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="p-4 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Select
           label="终端日志级别"
           placeholder="选择日志级别"
@@ -118,7 +118,7 @@ function ScrapeSettings() {
   const [autoScrape, setAutoScrape] = useState(true)
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 space-y-8">
       {/* TMDB 设置 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
@@ -188,7 +188,7 @@ function MediaSettings() {
   const [customWords, setCustomWords] = useState('')
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 space-y-8">
       {/* 媒体库重命名格式 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">

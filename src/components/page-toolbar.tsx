@@ -109,7 +109,7 @@ export function PageToolbar({
 
   return (
     <Card className={`mb-6 ${className}`} radius="lg" shadow="sm">
-      <div className="p-6 from-content1 to-content2">
+      <div className="p-4 from-content1 to-content2">
         {/* 统计信息 */}
         {stats.length > 0 && (
           <div className="mb-6">

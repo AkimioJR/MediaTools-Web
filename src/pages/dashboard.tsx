@@ -174,7 +174,7 @@ export default function DashboardPage() {
   }, []) // 空依赖数组，只在组件挂载时执行一次
 
   return (
-    <div className="p-6 space-y-8 min-h-screen">
+    <div className="p-4 space-y-8 min-h-screen">
       {/* 页面工具栏 */}
       <PageToolbar
         actions={[
@@ -209,7 +209,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardBody className="pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {systemMetrics.map((metric) => (
                   <div key={metric.name} className="space-y-3">
                     <div className="flex items-center justify-between">
