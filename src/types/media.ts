@@ -32,3 +32,9 @@ export interface MediaItem {
   episode_title: string // 集标题
   episode_date: string // 集发布日期
 }
+
+export interface RecognizeMediaDetail {
+  item: MediaItem; // 识别的媒体信息
+  custom_rule: string; // 匹配的自定义规则
+  meta_rule: string; // 应用的媒体规则
+}
