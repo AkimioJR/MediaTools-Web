@@ -50,7 +50,7 @@
         </v-col>
       </v-row>
     </v-card-text>
-    <v-divider />
+
     <!-- 规则信息 -->
     <RuleInfo
       :meta_rule="mediaResp.meta_rule"
