@@ -18,7 +18,7 @@ export default function HomeLayout() {
         )}
       >
         <NavBar />
-        <div className="bg-content2/20">
+        <div className="">
           <Outlet />
         </div>
       </main>

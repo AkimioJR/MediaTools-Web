@@ -342,7 +342,7 @@ export default function StoragePage() {
   }, [files.length])
 
   return (
-    <div className="p-6 space-y-6 bg-content2/30">
+    <div className="p-6 space-y-6">
       {/* 操作工具栏 */}
       <Card radius="lg" shadow="sm">
         <CardBody>

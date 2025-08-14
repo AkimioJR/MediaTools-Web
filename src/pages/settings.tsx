@@ -14,7 +14,7 @@ export default function SettingsPage() {
   // 使用 tabsOnly 模式，工具栏不显示统计与按钮
 
   return (
-    <div className="p-6 space-y-6 bg-content2/30">
+    <div className="p-6 space-y-6">
       {/* 页面工具栏（含 Tabs） */}
       <PageToolbar
         tabsOnly

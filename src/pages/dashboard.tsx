@@ -174,7 +174,7 @@ export default function DashboardPage() {
   }, []) // 空依赖数组，只在组件挂载时执行一次
 
   return (
-    <div className="p-6 space-y-8 bg-content2/30 min-h-screen">
+    <div className="p-6 space-y-8 min-h-screen">
       {/* 页面工具栏 */}
       <PageToolbar
         actions={[
