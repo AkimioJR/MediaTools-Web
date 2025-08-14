@@ -14,24 +14,15 @@ import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
 import { Pagination } from '@heroui/pagination'
 import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from '@heroui/dropdown'
-import {
   File,
   Folder,
   Upload,
   Download,
-  Eye,
   Trash2,
   Database,
   Copy,
   Move,
   FolderPlus,
-  Edit,
-  MoreHorizontal,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -205,39 +196,6 @@ export default function StoragePage() {
     }
   }
 
-  // 基于全局 Modal 的内联表单组件
-  function RenameForm({
-    initialName,
-    onSubmit,
-    onCancel,
-  }: {
-    initialName: string
-    onSubmit: (name: string) => void
-    onCancel: () => void
-  }) {
-    const [name, setName] = useState(initialName)
-
-    return (
-      <div className="space-y-4">
-        <Input
-          label="新文件名"
-          placeholder="请输入新文件名"
-          value={name}
-          variant="bordered"
-          onValueChange={setName}
-        />
-        <div className="flex justify-end gap-2">
-          <Button variant="light" onPress={onCancel}>
-            取消
-          </Button>
-          <Button color="primary" onPress={() => onSubmit(name)}>
-            确认
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   function CopyMoveForm({
     providers,
     defaultProvider,
@@ -286,29 +244,6 @@ export default function StoragePage() {
         </div>
       </div>
     )
-  }
-
-  // 打开重命名对话框并执行
-  const openRenameModal = async (file: FileInfo) => {
-    const newName = await openModal<string | undefined>(
-      (modal) => (
-        <RenameForm
-          initialName={file.name}
-          onCancel={() => modal.close(undefined)}
-          onSubmit={(name) => modal.close(name)}
-        />
-      ),
-      { title: '重命名' },
-    )
-
-    if (!newName) return
-    try {
-      await StorageService.Rename(storageType, file.path, newName)
-      showSuccess('文件重命名成功')
-      await reloadFiles()
-    } catch (error) {
-      handleApiError(error, '文件重命名失败')
-    }
   }
 
   const openCopyModal = async (file: FileInfo) => {
@@ -533,80 +468,44 @@ export default function StoragePage() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       {!file.is_dir && (
-                        <>
-                          <Button
-                            isIconOnly
-                            aria-label="预览"
-                            size="sm"
-                            variant="light"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // TODO: 实现预览功能
-                            }}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            isIconOnly
-                            aria-label="下载"
-                            size="sm"
-                            variant="light"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDownload(file)
-                            }}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </>
+                        <Button
+                          isIconOnly
+                          aria-label="下载"
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleDownload(file)}
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
                       )}
 
-                      {/* 更多操作下拉菜单 */}
-                      <Dropdown>
-                        <DropdownTrigger>
-                          <Button
-                            isIconOnly
-                            aria-label="更多操作"
-                            size="sm"
-                            variant="light"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="文件操作">
-                          <DropdownItem
-                            key="rename"
-                            startContent={<Edit className="w-4 h-4" />}
-                            onPress={() => openRenameModal(file)}
-                          >
-                            重命名
-                          </DropdownItem>
-                          <DropdownItem
-                            key="copy"
-                            startContent={<Copy className="w-4 h-4" />}
-                            onPress={() => openCopyModal(file)}
-                          >
-                            复制
-                          </DropdownItem>
-                          <DropdownItem
-                            key="move"
-                            startContent={<Move className="w-4 h-4" />}
-                            onPress={() => openMoveModal(file)}
-                          >
-                            移动
-                          </DropdownItem>
-                          <DropdownItem
-                            key="delete"
-                            className="text-danger"
-                            color="danger"
-                            startContent={<Trash2 className="w-4 h-4" />}
-                            onPress={() => handleDelete(file)}
-                          >
-                            删除
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
+                      <Button
+                        isIconOnly
+                        aria-label="复制"
+                        size="sm"
+                        variant="light"
+                        onPress={() => openCopyModal(file)}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        aria-label="移动"
+                        size="sm"
+                        variant="light"
+                        onPress={() => openMoveModal(file)}
+                      >
+                        <Move className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        aria-label="删除"
+                        size="sm"
+                        variant="light"
+                        onPress={() => handleDelete(file)}
+                      >
+                        <Trash2 className="w-4 h-4 text-danger" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -630,8 +529,6 @@ export default function StoragePage() {
           )}
         </CardBody>
       </Card>
-
-      {/* 文件操作对话框已重构为全局 Modal（useModal） */}
     </div>
   )
 }
