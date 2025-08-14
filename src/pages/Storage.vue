@@ -1,6 +1,6 @@
 <template>
   <!-- <v-container fluid> -->
-  <v-card>
+  <v-card variant="flat">
     <v-card-title>
       <v-row align="center">
         <v-col cols="auto">
