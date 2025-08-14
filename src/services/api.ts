@@ -25,11 +25,11 @@ api.interceptors.response.use(
 
     // 如果后端返回 success: false，抛出错误
 
-    if (response.status !== 200) {
+    if (response.status !== 200 || !data.success) {
       throw new Error(data.message || '请求失败')
     }
 
-    return data
+    return data.data
   },
   (error: AxiosError<{ message?: string }>) => {
     // 网络错误或其他错误
