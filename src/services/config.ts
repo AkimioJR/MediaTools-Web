@@ -1,4 +1,3 @@
-import api from "@/services/api";
 import type {
   LogConfig,
   TMDBConfig,
@@ -6,52 +5,54 @@ import type {
   LibraryConfig,
   FormatConfig,
   CustomWordConfig,
-} from "@/types";
+} from '@/types'
+
+import api from '@/services/api'
 export const configService = {
   async getLogConfig(): Promise<LogConfig> {
-    return await api.get("/config/log");
+    return await api.get('/config/log')
   },
   async updateLogConfig(config: LogConfig): Promise<LogConfig> {
-    return await api.post("/config/log", config);
+    return await api.post('/config/log', config)
   },
 
   async getTMDBConfig(): Promise<TMDBConfig> {
-    return await api.get("/config/tmdb");
+    return await api.get('/config/tmdb')
   },
 
   async updateTMDBConfig(config: TMDBConfig): Promise<TMDBConfig> {
-    return await api.post("/config/tmdb", config);
+    return await api.post('/config/tmdb', config)
   },
 
   async getFanartConfig(): Promise<FanartConfig> {
-    return await api.get("/config/fanart");
+    return await api.get('/config/fanart')
   },
   async updateFanartConfig(config: FanartConfig): Promise<FanartConfig> {
-    return await api.post("/config/fanart", config);
+    return await api.post('/config/fanart', config)
   },
 
   async getMediaLibrariesConfig(): Promise<LibraryConfig[]> {
-    return await api.get("/config/media/libraries");
+    return await api.get('/config/media/libraries')
   },
   async updateMediaLibrariesConfig(
-    libraries: LibraryConfig[]
+    libraries: LibraryConfig[],
   ): Promise<LibraryConfig[]> {
-    return await api.post("/config/media/libraries", libraries);
+    return await api.post('/config/media/libraries', libraries)
   },
 
   async getMediaFormatConfig(): Promise<FormatConfig> {
-    return await api.get("/config/media/format");
+    return await api.get('/config/media/format')
   },
   async updateMediaFormatConfig(format: FormatConfig): Promise<FormatConfig> {
-    return await api.post("/config/media/format", format);
+    return await api.post('/config/media/format', format)
   },
 
   async getCustomWordConfig(): Promise<CustomWordConfig> {
-    return await api.get("/config/media/custom_word");
+    return await api.get('/config/media/custom_word')
   },
   async updateCustomWordConfig(
-    config: CustomWordConfig
+    config: CustomWordConfig,
   ): Promise<CustomWordConfig> {
-    return await api.post("/config/media/custom_word", config);
+    return await api.post('/config/media/custom_word', config)
   },
-};
+}

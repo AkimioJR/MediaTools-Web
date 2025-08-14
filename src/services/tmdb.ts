@@ -1,5 +1,4 @@
-import api from "@/services/api";
-import { type MediaItem } from "@/types";
+import api from '@/services/api'
 
 export const TMDBService = {
   ImageService: {
@@ -10,7 +9,7 @@ export const TMDBService = {
      * @returns 海报图像的URL
      */
     async GetPosterImage(media_type: string, tmdb_id: number): Promise<string> {
-      return await api.get(`/tmdb/image/poster/${media_type}/${tmdb_id}`);
+      return await api.get(`/tmdb/image/poster/${media_type}/${tmdb_id}`)
     },
   },
 
@@ -21,6 +20,6 @@ export const TMDBService = {
    * @returns 媒体详情
    */
   async GetOverview(media_type: string, tmdb_id: number): Promise<string> {
-    return await api.get(`/tmdb/overview/${media_type}/${tmdb_id}`);
+    return await api.get(`/tmdb/overview/${media_type}/${tmdb_id}`)
   },
-};
+}

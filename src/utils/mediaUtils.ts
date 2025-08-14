@@ -9,15 +9,15 @@
  */
 export const getMediaTypeText = (type: string | number): string => {
   const typeMap: Record<string | number, string> = {
-    1: "电影",
-    2: "电视剧",
-    movie: "电影",
-    tv: "电视剧",
-    series: "电视剧",
-  };
+    1: '电影',
+    2: '电视剧',
+    movie: '电影',
+    tv: '电视剧',
+    series: '电视剧',
+  }
 
-  return typeMap[type] || String(type);
-};
+  return typeMap[type] || String(type)
+}
 
 /**
  * 提取错误信息
@@ -25,31 +25,31 @@ export const getMediaTypeText = (type: string | number): string => {
  * @returns 格式化的错误信息
  */
 export const extractErrorMessage = (error: unknown): string => {
-  const defaultMessage = "识别媒体失败，请稍后重试";
+  const defaultMessage = '识别媒体失败，请稍后重试'
 
-  if (!error || typeof error !== "object") {
-    return defaultMessage;
+  if (!error || typeof error !== 'object') {
+    return defaultMessage
   }
 
-  const errorObj = error as any;
+  const errorObj = error as any
 
   // 检查是否有 response.data.message (Axios HTTP 错误)
   if (errorObj.response?.data?.message) {
-    return errorObj.response.data.message;
+    return errorObj.response.data.message
   }
 
   // 检查是否有 message 属性 (通用错误对象)
   if (errorObj.message) {
-    return errorObj.message;
+    return errorObj.message
   }
 
   // 检查是否有 data.message (其他数据格式)
   if (errorObj.data?.message) {
-    return errorObj.data.message;
+    return errorObj.data.message
   }
 
-  return defaultMessage;
-};
+  return defaultMessage
+}
 
 /**
  * 验证媒体标题输入
@@ -57,26 +57,26 @@ export const extractErrorMessage = (error: unknown): string => {
  * @returns 验证结果
  */
 export const validateMediaTitle = (
-  title: string | null | undefined
+  title: string | null | undefined,
 ): {
-  isValid: boolean;
-  errorMessage?: string;
+  isValid: boolean
+  errorMessage?: string
 } => {
   if (!title) {
     return {
       isValid: false,
-      errorMessage: "请输入媒体名称",
-    };
+      errorMessage: '请输入媒体名称',
+    }
   }
 
-  const trimmedTitle = title.trim();
+  const trimmedTitle = title.trim()
 
   if (!trimmedTitle) {
     return {
       isValid: false,
-      errorMessage: "请输入媒体名称",
-    };
+      errorMessage: '请输入媒体名称',
+    }
   }
 
-  return { isValid: true };
-};
+  return { isValid: true }
+}
