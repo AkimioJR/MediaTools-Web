@@ -28,8 +28,8 @@ export const StorageService = {
     },
   },
 
-  async CheckExists(storage_type: string, path: string): Promise<boolean> {
-    return await api.get(`/storage/${storage_type}/exists`, {
+  async Exist(storage_type: string, path: string): Promise<boolean> {
+    return await api.get(`/storage/${storage_type}/exist`, {
       params: { path },
     })
   },
@@ -40,7 +40,7 @@ export const StorageService = {
     })
   },
 
-  async Mkdir(storage_type: string, path: string): Promise<FileInfo> {
+  async Mkdir(storage_type: string, path: string): Promise<string> {
     return await api.post(`/storage/${storage_type}/mkdir`, {
       path,
     })
@@ -50,14 +50,14 @@ export const StorageService = {
     storage_type: string,
     path: string,
     new_name: string,
-  ): Promise<FileInfo> {
+  ): Promise<string> {
     return await api.post(`/storage/${storage_type}/rename`, {
       path,
       new_name,
     })
   },
 
-  async Delete(storage_type: string, path: string): Promise<FileInfo> {
+  async Delete(storage_type: string, path: string): Promise<string> {
     return await api.delete(`/storage/${storage_type}/delete`, {
       data: { path },
     })
