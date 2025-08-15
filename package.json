@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "lint": "eslint --fix",
     "preview": "vite preview"
@@ -17,6 +17,7 @@
     "@heroui/card": "^2.2.23",
     "@heroui/chip": "^2.2.20",
     "@heroui/code": "^2.2.18",
+    "@heroui/drawer": "^2.2.21",
     "@heroui/dropdown": "^2.3.24",
     "@heroui/input": "^2.4.25",
     "@heroui/kbd": "^2.2.19",

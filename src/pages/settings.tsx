@@ -11,12 +11,16 @@ export default function SettingsPage() {
   const [selectedTab, setSelectedTab] = useState('log')
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
       {/* 标签页工具栏 */}
       <Card radius="lg" shadow="sm">
-        <div className="p-3">
+        <div className="p-3 sm:p-4">
           <Tabs
             aria-label="设置选项"
+            classNames={{
+              tabList: 'gap-2',
+              tab: 'text-sm',
+            }}
             selectedKey={selectedTab}
             onSelectionChange={(key) => setSelectedTab(key as string)}
           >
@@ -25,7 +29,8 @@ export default function SettingsPage() {
               title={
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4" />
-                  <span>日志配置</span>
+                  <span className="hidden sm:inline">日志配置</span>
+                  <span className="sm:hidden">日志</span>
                 </div>
               }
             />
@@ -34,7 +39,8 @@ export default function SettingsPage() {
               title={
                 <div className="flex items-center space-x-2">
                   <Image className="w-4 h-4" />
-                  <span>刮削配置</span>
+                  <span className="hidden sm:inline">刮削配置</span>
+                  <span className="sm:hidden">刮削</span>
                 </div>
               }
             />
@@ -43,7 +49,8 @@ export default function SettingsPage() {
               title={
                 <div className="flex items-center space-x-2">
                   <Video className="w-4 h-4" />
-                  <span>媒体库配置</span>
+                  <span className="hidden sm:inline">媒体库配置</span>
+                  <span className="sm:hidden">媒体</span>
                 </div>
               }
             />
@@ -75,7 +82,7 @@ function LogSettings() {
   ]
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Select
           label="终端日志级别"
@@ -130,13 +137,13 @@ function ScrapeSettings() {
   const [autoScrape, setAutoScrape] = useState(true)
 
   return (
-    <div className="p-4 space-y-8">
+    <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
       {/* TMDB 设置 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Video className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">TMDB 设置</h3>
+            <h3 className="text-base sm:text-lg font-semibold">TMDB 设置</h3>
           </div>
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
@@ -148,10 +155,10 @@ function ScrapeSettings() {
             variant="bordered"
             onValueChange={setTmdbApiKey}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <p className="font-medium">自动刮削</p>
-              <p className="text-sm text-foreground-500">
+              <p className="font-medium text-sm sm:text-base">自动刮削</p>
+              <p className="text-xs sm:text-sm text-foreground-500">
                 上传文件时自动获取元数据
               </p>
             </div>
@@ -169,7 +176,7 @@ function ScrapeSettings() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Image className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Fanart 设置</h3>
+            <h3 className="text-base sm:text-lg font-semibold">Fanart 设置</h3>
           </div>
         </CardHeader>
         <CardBody className="pt-0">
@@ -200,13 +207,15 @@ function MediaSettings() {
   const [customWords, setCustomWords] = useState('')
 
   return (
-    <div className="p-4 space-y-8">
+    <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
       {/* 媒体库重命名格式 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Video className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">媒体库重命名格式</h3>
+            <h3 className="text-base sm:text-lg font-semibold">
+              媒体库重命名格式
+            </h3>
           </div>
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
@@ -217,7 +226,7 @@ function MediaSettings() {
             variant="bordered"
             onValueChange={setRenameFormat}
           />
-          <p className="text-sm text-foreground-500">
+          <p className="text-xs sm:text-sm text-foreground-500">
             支持变量: {'{title}'}, {'{year}'}, {'{genre}'}, {'{quality}'}
           </p>
         </CardBody>
@@ -228,7 +237,7 @@ function MediaSettings() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Settings className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">媒体库配置</h3>
+            <h3 className="text-base sm:text-lg font-semibold">媒体库配置</h3>
           </div>
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
@@ -239,10 +248,12 @@ function MediaSettings() {
             variant="bordered"
             onValueChange={setLibraryPath}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <p className="font-medium">自动扫描</p>
-              <p className="text-sm text-foreground-500">定期扫描媒体库目录</p>
+              <p className="font-medium text-sm sm:text-base">自动扫描</p>
+              <p className="text-xs sm:text-sm text-foreground-500">
+                定期扫描媒体库目录
+              </p>
             </div>
             <Switch defaultSelected color="primary" />
           </div>
@@ -254,7 +265,9 @@ function MediaSettings() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">自定义词条配置</h3>
+            <h3 className="text-base sm:text-lg font-semibold">
+              自定义词条配置
+            </h3>
           </div>
         </CardHeader>
         <CardBody className="pt-0">

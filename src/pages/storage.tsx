@@ -342,16 +342,16 @@ export default function StoragePage() {
   }, [files.length])
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
       {/* 操作工具栏 */}
       <Card radius="lg" shadow="sm">
-        <CardBody>
-          <div className="flex items-center justify-between w-full gap-4">
-            {/* 左侧：存储器选择 */}
-            <div className="flex items-center gap-4 flex-1">
+        <CardBody className="p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {/* 存储器选择和路径导航 */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
               <Select
                 aria-label="存储器选择"
-                className="w-48"
+                className="w-full sm:w-48"
                 placeholder="请选择存储器"
                 selectedKeys={storageType ? [storageType] : []}
                 size="md"
@@ -372,17 +372,22 @@ export default function StoragePage() {
 
               {/* 路径导航 */}
               <div className="flex items-center gap-2 p-2 bg-content2 rounded-lg flex-1 min-w-0">
-                <span className="text-sm text-foreground-500 whitespace-nowrap">
+                <span className="text-xs sm:text-sm text-foreground-500 whitespace-nowrap flex-shrink-0">
                   当前路径:
                 </span>
-                <div className="flex items-center gap-1 flex-wrap min-w-0">
+                <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide min-w-0 flex-1">
                   {getBreadcrumbs().map((breadcrumb, index) => (
-                    <div key={index} className="flex items-center gap-1">
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 flex-shrink-0"
+                    >
                       {index > 0 && (
-                        <span className="text-foreground-400">/</span>
+                        <span className="text-foreground-400 flex-shrink-0">
+                          /
+                        </span>
                       )}
                       <Button
-                        className="h-6 px-2 min-w-0"
+                        className="h-6 px-2 min-w-0 text-xs whitespace-nowrap flex-shrink-0"
                         size="sm"
                         variant="light"
                         onPress={() => setCurrentPath(breadcrumb.path)}
@@ -395,8 +400,8 @@ export default function StoragePage() {
               </div>
             </div>
 
-            {/* 右侧：操作按钮 */}
-            <div className="flex items-center gap-3">
+            {/* 操作按钮 */}
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 color="primary"
                 isDisabled={!storageType}
@@ -425,97 +430,111 @@ export default function StoragePage() {
       {/* 文件列表 */}
       <Card radius="lg" shadow="sm">
         <CardBody className="p-0">
-          <Table
-            isStriped
-            removeWrapper
-            aria-label="文件列表"
-            classNames={{
-              th: 'bg-default-100',
-              td: 'py-3',
-            }}
-          >
-            <TableHeader>
-              <TableColumn>名称</TableColumn>
-              <TableColumn>大小</TableColumn>
-              <TableColumn>修改时间</TableColumn>
-              <TableColumn width={200}>操作</TableColumn>
-            </TableHeader>
-            <TableBody
-              emptyContent="此目录为空"
-              isLoading={loading}
-              loadingContent="加载中..."
+          <div className="overflow-x-auto">
+            <Table
+              isStriped
+              removeWrapper
+              aria-label="文件列表"
+              classNames={{
+                th: 'bg-default-100 text-xs sm:text-sm',
+                td: 'py-2 sm:py-3 text-xs sm:text-sm',
+              }}
             >
-              {items.map((file) => (
-                <TableRow
-                  key={file.path}
-                  className="cursor-pointer hover:bg-content2"
-                  onClick={() => handleFileClick(file)}
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {getFileIcon(file)}
-                      <span className="font-medium">{file.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {file.is_dir ? '-' : formatFileSize(file.size)}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-foreground-500">
-                      {formatDate(file.mod_time)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {!file.is_dir && (
+              <TableHeader>
+                <TableColumn>名称</TableColumn>
+                <TableColumn className="hidden sm:table-cell">大小</TableColumn>
+                <TableColumn className="hidden md:table-cell">
+                  修改时间
+                </TableColumn>
+                <TableColumn className="sm:w-[200px]" width={120}>
+                  操作
+                </TableColumn>
+              </TableHeader>
+              <TableBody
+                emptyContent="此目录为空"
+                isLoading={loading}
+                loadingContent="加载中..."
+              >
+                {items.map((file) => (
+                  <TableRow
+                    key={file.path}
+                    className="cursor-pointer hover:bg-content2"
+                    onClick={() => handleFileClick(file)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        {getFileIcon(file)}
+                        <div className="min-w-0 flex-1">
+                          <span className="font-medium text-xs sm:text-sm truncate block">
+                            {file.name}
+                          </span>
+                          {/* 移动端显示文件大小 */}
+                          <span className="text-xs text-foreground-500 sm:hidden">
+                            {file.is_dir ? '文件夹' : formatFileSize(file.size)}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {file.is_dir ? '-' : formatFileSize(file.size)}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-xs sm:text-sm text-foreground-500">
+                        {formatDate(file.mod_time)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {!file.is_dir && (
+                          <Button
+                            isIconOnly
+                            aria-label="下载"
+                            size="sm"
+                            variant="light"
+                            onPress={() => handleDownload(file)}
+                          >
+                            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                          </Button>
+                        )}
+
                         <Button
                           isIconOnly
-                          aria-label="下载"
+                          aria-label="复制"
                           size="sm"
                           variant="light"
-                          onPress={() => handleDownload(file)}
+                          onPress={() => openCopyModal(file)}
                         >
-                          <Download className="w-4 h-4" />
+                          <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
-                      )}
-
-                      <Button
-                        isIconOnly
-                        aria-label="复制"
-                        size="sm"
-                        variant="light"
-                        onPress={() => openCopyModal(file)}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        aria-label="移动"
-                        size="sm"
-                        variant="light"
-                        onPress={() => openMoveModal(file)}
-                      >
-                        <Move className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        aria-label="删除"
-                        size="sm"
-                        variant="light"
-                        onPress={() => handleDelete(file)}
-                      >
-                        <Trash2 className="w-4 h-4 text-danger" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        <Button
+                          isIconOnly
+                          aria-label="移动"
+                          size="sm"
+                          variant="light"
+                          onPress={() => openMoveModal(file)}
+                        >
+                          <Move className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
+                        <Button
+                          isIconOnly
+                          aria-label="删除"
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleDelete(file)}
+                        >
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-danger" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* 分页组件 */}
           {files.length > 0 && (
-            <div className="flex justify-center py-4">
+            <div className="flex justify-center py-3 sm:py-4">
               <Pagination
                 showControls
                 showShadow

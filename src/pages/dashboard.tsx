@@ -145,21 +145,21 @@ export default function DashboardPage() {
   }, []) // 空依赖数组，只在组件挂载时执行一次
 
   return (
-    <div className="p-4 space-y-8">
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-8">
       {/* 统计信息卡片 */}
       <Card radius="lg" shadow="sm">
-        <CardBody className="p-3">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardBody className="p-3 sm:p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-content1 rounded-xl p-4 border border-divider hover:shadow-md transition-all duration-200"
+                className="bg-content1 rounded-xl p-3 sm:p-4 border border-divider hover:shadow-md transition-all duration-200"
               >
                 <div className="text-xs font-medium text-foreground-500 mb-1">
                   {stat.label}
                 </div>
                 <div
-                  className={`text-lg font-bold ${
+                  className={`text-base sm:text-lg font-bold ${
                     stat.color === 'primary'
                       ? 'text-primary'
                       : stat.color === 'success'
@@ -181,9 +181,9 @@ export default function DashboardPage() {
 
       {/* 工具栏卡片 */}
       <Card radius="lg" shadow="sm">
-        <CardBody className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* 左侧：搜索和选择器 */}
+        <CardBody className="p-3 sm:p-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {/* 搜索和选择器 */}
             <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
               {/* 搜索框 */}
               <Input
@@ -228,12 +228,12 @@ export default function DashboardPage() {
               </Select>
             </div>
 
-            {/* 右侧：操作按钮 */}
-            <div className="flex flex-wrap gap-3 shrink-0">
+            {/* 操作按钮 */}
+            <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
               <Button
                 className="font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
                 radius="lg"
-                size="md"
+                size="sm"
                 startContent={<RefreshCw className="w-4 h-4" />}
                 variant="bordered"
                 onPress={handleRefresh}
@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <Button
                 className="font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
                 radius="lg"
-                size="md"
+                size="sm"
                 startContent={<Settings2 className="w-4 h-4" />}
                 variant="bordered"
                 onPress={handleSettings}
@@ -258,7 +258,7 @@ export default function DashboardPage() {
       {/* 系统日志 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />
               <h3 className="text-lg font-semibold">系统日志</h3>
@@ -309,8 +309,8 @@ export default function DashboardPage() {
               aria-label="系统日志"
               classNames={{
                 wrapper: 'min-h-[200px]',
-                th: 'bg-default-100',
-                td: 'py-2',
+                th: 'bg-default-100 text-xs sm:text-sm',
+                td: 'py-2 text-xs sm:text-sm',
               }}
             >
               <TableHeader>
@@ -335,13 +335,13 @@ export default function DashboardPage() {
                       </Chip>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-foreground-500">
+                      <span className="text-xs sm:text-sm text-foreground-500">
                         {formatTime(log.time)}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-md">
-                        <p className="text-sm">{log.message}</p>
+                      <div className="max-w-xs sm:max-w-md">
+                        <p className="text-xs sm:text-sm">{log.message}</p>
                         {log.caller && (
                           <p className="text-xs text-foreground-400 mt-1">
                             {log.caller}
