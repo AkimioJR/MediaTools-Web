@@ -402,7 +402,7 @@ export default function DashboardPage() {
                         <p className="text-sm">{log.message}</p>
                         {log.caller && (
                           <p className="text-xs text-foreground-400 mt-1">
-                            调用者: {log.caller}
+                            {log.caller}
                           </p>
                         )}
                       </div>
