@@ -3,41 +3,53 @@ import { Switch } from '@heroui/switch'
 import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
 import { Button } from '@heroui/button'
+import { Tabs, Tab } from '@heroui/tabs'
 import { FileText, Image, Video, Settings } from 'lucide-react'
 import { useState } from 'react'
-
-import { PageToolbar } from '@/components/page-toolbar'
 
 export default function SettingsPage() {
   const [selectedTab, setSelectedTab] = useState('log')
 
-  // 使用 tabsOnly 模式，工具栏不显示统计与按钮
-
   return (
     <div className="p-4 space-y-6">
-      {/* 页面工具栏（含 Tabs） */}
-      <PageToolbar
-        tabsOnly
-        selectedTabKey={selectedTab}
-        tabs={[
-          {
-            key: 'log',
-            label: '日志配置',
-            icon: <FileText className="w-4 h-4" />,
-          },
-          {
-            key: 'scrape',
-            label: '刮削配置',
-            icon: <Image className="w-4 h-4" />,
-          },
-          {
-            key: 'media',
-            label: '媒体库配置',
-            icon: <Video className="w-4 h-4" />,
-          },
-        ]}
-        onTabChange={(key) => setSelectedTab(key)}
-      />
+      {/* 标签页工具栏 */}
+      <Card radius="lg" shadow="sm">
+        <div className="p-3">
+          <Tabs
+            aria-label="设置选项"
+            selectedKey={selectedTab}
+            onSelectionChange={(key) => setSelectedTab(key as string)}
+          >
+            <Tab
+              key="log"
+              title={
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span>日志配置</span>
+                </div>
+              }
+            />
+            <Tab
+              key="scrape"
+              title={
+                <div className="flex items-center space-x-2">
+                  <Image className="w-4 h-4" />
+                  <span>刮削配置</span>
+                </div>
+              }
+            />
+            <Tab
+              key="media"
+              title={
+                <div className="flex items-center space-x-2">
+                  <Video className="w-4 h-4" />
+                  <span>媒体库配置</span>
+                </div>
+              }
+            />
+          </Tabs>
+        </div>
+      </Card>
 
       {/* 设置内容（随 tabs 切换） */}
       <Card radius="lg" shadow="sm">

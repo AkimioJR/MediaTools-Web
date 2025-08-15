@@ -1,9 +1,10 @@
 import type { LogDetail } from '@/types/log'
 
 import { Card, CardBody, CardHeader } from '@heroui/card'
-import { Progress } from '@heroui/progress'
 import { Chip } from '@heroui/chip'
 import { Button } from '@heroui/button'
+import { Select, SelectItem } from '@heroui/select'
+import { Input } from '@heroui/input'
 import {
   Table,
   TableHeader,
@@ -15,23 +16,20 @@ import {
 import { Spinner } from '@heroui/spinner'
 import {
   Activity,
-  HardDrive,
-  Cpu,
-  Wifi,
-  Users,
-  FileText,
   RefreshCw,
   AlertCircle,
   Circle,
+  Search,
+  Settings2,
 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 
-import { PageToolbar, toolbarPresets } from '@/components/page-toolbar'
 import { LogService } from '@/services/log'
 import { handleApiError } from '@/utils/message'
 
 export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState('today')
+  const [searchValue, setSearchValue] = useState('')
 
   // 日志相关状态
   const [logs, setLogs] = useState<LogDetail[]>([])
@@ -45,33 +43,6 @@ export default function DashboardPage() {
     { label: '存储使用', value: '85%', color: 'warning' as const },
     { label: '活跃用户', value: '23', color: 'success' as const },
     { label: '今日处理', value: '156', color: 'primary' as const },
-  ]
-
-  const systemMetrics = [
-    {
-      name: 'CPU 使用率',
-      value: 65,
-      color: 'primary',
-      icon: <Cpu className="w-4 h-4" />,
-    },
-    {
-      name: '内存使用',
-      value: 78,
-      color: 'warning',
-      icon: <Activity className="w-4 h-4" />,
-    },
-    {
-      name: '磁盘空间',
-      value: 45,
-      color: 'success',
-      icon: <HardDrive className="w-4 h-4" />,
-    },
-    {
-      name: '网络状态',
-      value: 92,
-      color: 'success',
-      icon: <Wifi className="w-4 h-4" />,
-    },
   ]
 
   const handleRefresh = () => {
@@ -174,144 +145,115 @@ export default function DashboardPage() {
   }, []) // 空依赖数组，只在组件挂载时执行一次
 
   return (
-    <div className="p-4 space-y-8 min-h-screen">
-      {/* 页面工具栏 */}
-      <PageToolbar
-        actions={[
-          {
-            ...toolbarPresets.dashboard.actions[0],
-            onPress: handleRefresh,
-          },
-          {
-            ...toolbarPresets.dashboard.actions[1],
-            onPress: handleSettings,
-          },
-        ]}
-        selects={[
-          {
-            ...toolbarPresets.dashboard.selects[0],
-            selectedKey: timeRange,
-            onSelectionChange: setTimeRange,
-          },
-        ]}
-        stats={stats}
-      />
-
-      {/* 主要内容区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 系统指标 */}
-        <div className="lg:col-span-2">
-          <Card className="h-full" radius="lg" shadow="sm">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold">系统指标</h3>
-              </div>
-            </CardHeader>
-            <CardBody className="pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {systemMetrics.map((metric) => (
-                  <div key={metric.name} className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {metric.icon}
-                        <span className="text-sm font-medium">
-                          {metric.name}
-                        </span>
-                      </div>
-                      <span className="text-sm text-foreground-500">
-                        {metric.value}%
-                      </span>
-                    </div>
-                    <Progress
-                      aria-label={metric.name}
-                      className="w-full"
-                      color={metric.color as any}
-                      size="sm"
-                      value={metric.value}
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* 快速操作 */}
-        <div>
-          <Card className="h-full" radius="lg" shadow="sm">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold">快速操作</h3>
-              </div>
-            </CardHeader>
-            <CardBody className="pt-0">
-              <div className="space-y-3">
-                <Card
-                  isPressable
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-none shadow-sm hover:shadow-md transition-all duration-200"
-                  radius="lg"
+    <div className="p-4 space-y-8">
+      {/* 统计信息卡片 */}
+      <Card radius="lg" shadow="sm">
+        <CardBody className="p-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat, index) => (
+              <div
+                key={index}
+                className="bg-content1 rounded-xl p-4 border border-divider hover:shadow-md transition-all duration-200"
+              >
+                <div className="text-xs font-medium text-foreground-500 mb-1">
+                  {stat.label}
+                </div>
+                <div
+                  className={`text-lg font-bold ${
+                    stat.color === 'primary'
+                      ? 'text-primary'
+                      : stat.color === 'success'
+                        ? 'text-success'
+                        : stat.color === 'warning'
+                          ? 'text-warning'
+                          : stat.color === 'danger'
+                            ? 'text-danger'
+                            : 'text-foreground'
+                  }`}
                 >
-                  <CardBody className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">用户管理</h4>
-                        <p className="text-xs text-foreground-500">
-                          管理系统用户
-                        </p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-
-                <Card
-                  isPressable
-                  className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-none shadow-sm hover:shadow-md transition-all duration-200"
-                  radius="lg"
-                >
-                  <CardBody className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center">
-                        <HardDrive className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">存储分析</h4>
-                        <p className="text-xs text-foreground-500">
-                          查看存储详情
-                        </p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-
-                <Card
-                  isPressable
-                  className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-none shadow-sm hover:shadow-md transition-all duration-200"
-                  radius="lg"
-                >
-                  <CardBody className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
-                        <Activity className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">性能监控</h4>
-                        <p className="text-xs text-foreground-500">
-                          系统性能分析
-                        </p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
+                  {stat.value}
+                </div>
               </div>
-            </CardBody>
-          </Card>
-        </div>
-      </div>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* 工具栏卡片 */}
+      <Card radius="lg" shadow="sm">
+        <CardBody className="p-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            {/* 左侧：搜索和选择器 */}
+            <div className="flex flex-col sm:flex-row gap-3 flex-1 min-w-0">
+              {/* 搜索框 */}
+              <Input
+                className="w-full sm:w-80"
+                classNames={{
+                  input: 'bg-transparent',
+                  inputWrapper:
+                    'bg-content2 hover:bg-content3 transition-colors duration-200 border-0 shadow-sm',
+                }}
+                placeholder="搜索..."
+                radius="lg"
+                startContent={
+                  <Search className="w-4 h-4 text-foreground-400" />
+                }
+                value={searchValue}
+                variant="flat"
+                onValueChange={setSearchValue}
+              />
+
+              {/* 时间范围选择器 */}
+              <Select
+                aria-label="时间范围"
+                className="w-full sm:w-48"
+                classNames={{
+                  trigger:
+                    'bg-content2 hover:bg-content3 border-0 shadow-sm transition-colors duration-200',
+                }}
+                placeholder="选择时间范围"
+                radius="lg"
+                selectedKeys={timeRange ? [timeRange] : []}
+                variant="flat"
+                onSelectionChange={(keys) => {
+                  const key = Array.from(keys)[0] as string
+
+                  setTimeRange(key)
+                }}
+              >
+                <SelectItem key="today">今天</SelectItem>
+                <SelectItem key="week">本周</SelectItem>
+                <SelectItem key="month">本月</SelectItem>
+                <SelectItem key="year">本年</SelectItem>
+              </Select>
+            </div>
+
+            {/* 右侧：操作按钮 */}
+            <div className="flex flex-wrap gap-3 shrink-0">
+              <Button
+                className="font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
+                radius="lg"
+                size="md"
+                startContent={<RefreshCw className="w-4 h-4" />}
+                variant="bordered"
+                onPress={handleRefresh}
+              >
+                刷新
+              </Button>
+              <Button
+                className="font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
+                radius="lg"
+                size="md"
+                startContent={<Settings2 className="w-4 h-4" />}
+                variant="bordered"
+                onPress={handleSettings}
+              >
+                设置
+              </Button>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
 
       {/* 系统日志 */}
       <Card radius="lg" shadow="sm">
