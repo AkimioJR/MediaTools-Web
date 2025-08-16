@@ -1,7 +1,5 @@
 import type { RecognizeMediaDetail } from '@/types/media'
 
-import { log } from 'console'
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from '@heroui/input'

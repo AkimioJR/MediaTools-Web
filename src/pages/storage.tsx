@@ -23,12 +23,14 @@ import {
   Copy,
   Move,
   FolderPlus,
+  ScanSearch,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 import { StorageService } from '@/services/storage'
 import { showSuccess, handleApiError } from '@/utils/message'
 import { useModal } from '@/components/modal-provider'
+import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 
 export default function StoragePage() {
   const [currentPath, setCurrentPath] = useState('/')
@@ -176,6 +178,13 @@ export default function StoragePage() {
       }
     }
     input.click()
+  }
+
+  const handleRecognizeSelectedMedia = async (file: FileInfo) => {
+    await openModal(() => <MediaRecognitionDialog defaultValue={file.name} />, {
+      title: '媒体识别',
+      size: window.innerWidth < 768 ? '3xl' : '4xl',
+    })
   }
 
   const handleDownload = async (file: FileInfo) => {
@@ -488,6 +497,15 @@ export default function StoragePage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
+                        <Button
+                          isIconOnly
+                          aria-label="识别媒体"
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleRecognizeSelectedMedia(file)}
+                        >
+                          <ScanSearch className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
                         {!file.is_dir && (
                           <Button
                             isIconOnly
