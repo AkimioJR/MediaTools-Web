@@ -75,9 +75,9 @@ export const StorageService = {
     dest_storage_type: string,
     dest_path: string,
   ): Promise<FileInfo> {
-    return await api.post(`/storage/${src_storage_type}/copy`, {
-      src: { path: src_path, storage_type: src_storage_type },
-      dest: { path: dest_path, storage_type: dest_storage_type },
+    return await api.post(`/storage/copy`, {
+      src_file: { path: src_path, storage_type: src_storage_type },
+      dst_file: { path: dest_path, storage_type: dest_storage_type },
     })
   },
 
@@ -87,9 +87,9 @@ export const StorageService = {
     dest_storage_type: string,
     dest_path: string,
   ): Promise<FileInfo> {
-    return await api.post(`/storage/${src_storage_type}/move`, {
-      src: { path: src_path, storage_type: src_storage_type },
-      dest: { path: dest_path, storage_type: dest_storage_type },
+    return await api.post(`/storage/move`, {
+      src_file: { path: src_path, storage_type: src_storage_type },
+      dst_file: { path: dest_path, storage_type: dest_storage_type },
     })
   },
 
@@ -99,9 +99,9 @@ export const StorageService = {
     dest_storage_type: string,
     dest_path: string,
   ): Promise<FileInfo> {
-    return await api.post(`/storage/${src_storage_type}/link`, {
-      src: { path: src_path, storage_type: src_storage_type },
-      dest: { path: dest_path, storage_type: dest_storage_type },
+    return await api.post(`/storage/link`, {
+      src_file: { path: src_path, storage_type: src_storage_type },
+      dst_file: { path: dest_path, storage_type: dest_storage_type },
     })
   },
 
@@ -111,9 +111,9 @@ export const StorageService = {
     dest_storage_type: string,
     dest_path: string,
   ): Promise<FileInfo> {
-    return await api.post(`/storage/${src_storage_type}/softlink`, {
-      src: { path: src_path, storage_type: src_storage_type },
-      dest: { path: dest_path, storage_type: dest_storage_type },
+    return await api.post(`/storage/softlink`, {
+      src_file: { path: src_path, storage_type: src_storage_type },
+      dst_file: { path: dest_path, storage_type: dest_storage_type },
     })
   },
 
@@ -124,9 +124,9 @@ export const StorageService = {
     dest_path: string,
     transfer_type: string = 'copy',
   ): Promise<FileInfo> {
-    return await api.post(`/storage/${src_storage_type}/transfer`, {
-      src: { path: src_path, storage_type: src_storage_type },
-      dest: { path: dest_path, storage_type: dest_storage_type },
+    return await api.post(`/storage/transfer`, {
+      src_file: { path: src_path, storage_type: src_storage_type },
+      dst_file: { path: dest_path, storage_type: dest_storage_type },
       transfer_type,
     })
   },
