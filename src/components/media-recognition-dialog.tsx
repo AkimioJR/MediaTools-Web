@@ -1,5 +1,7 @@
 import type { RecognizeMediaDetail } from '@/types/media'
 
+import { log } from 'console'
+
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from '@heroui/input'
@@ -425,21 +427,38 @@ const MediaDetail = React.memo(function MediaDetail({
   )
 })
 
-export function MediaRecognitionDialog() {
-  const [mediaTitle, setMediaTitle] = useState('')
+export function MediaRecognitionDialog({
+  defaultValue = '',
+}: {
+  defaultValue?: string
+}) {
+  const [mediaTitle, setMediaTitle] = useState(defaultValue)
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<RecognizeMediaDetail | null>(null)
   const [errMsg, setErrMsg] = useState<string | null>(null)
 
-  async function handleRecognize() {
-    if (!mediaTitle.trim()) return
+  useEffect(() => {
+    if (defaultValue && defaultValue.trim()) {
+      setMediaTitle(defaultValue)
+      const timer = setTimeout(() => {
+        handleRecognize(defaultValue)
+      }, 100)
+
+      return () => clearTimeout(timer)
+    }
+  }, [defaultValue])
+
+  async function handleRecognize(title?: string) {
+    const targetTitle = title || mediaTitle
+
+    if (!targetTitle.trim()) return
 
     setIsLoading(true)
     setResult(null)
     setErrMsg(null)
 
     try {
-      const response = await RecognizeService.RecognizeMedia(mediaTitle.trim())
+      const response = await RecognizeService.RecognizeMedia(targetTitle.trim())
 
       setResult(response)
     } catch (error) {
@@ -474,7 +493,7 @@ export function MediaRecognitionDialog() {
           color="primary"
           isDisabled={!mediaTitle.trim() || isLoading}
           isLoading={isLoading}
-          onPress={handleRecognize}
+          onPress={() => handleRecognize()}
         >
           {isLoading ? '识别中...' : '识别'}
         </Button>

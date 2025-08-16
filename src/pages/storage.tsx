@@ -57,13 +57,6 @@ export default function StoragePage() {
         setProviders(providerList)
         if (providerList.length > 0) {
           setStorageType(providerList[0].storage_type)
-          // 根据存储类型设置初始路径
-          // Windows 类型存储使用反斜杠，其他使用正斜杠
-          const isWindowsStorage =
-            providerList[0].storage_type.toLowerCase().includes('local') ||
-            providerList[0].storage_type.toLowerCase().includes('windows')
-
-          setCurrentPath(isWindowsStorage ? '\\' : '/')
         }
       } catch (error) {
         handleApiError(error, '加载存储提供者失败')
@@ -96,39 +89,15 @@ export default function StoragePage() {
     loadFiles()
   }, [currentPath, storageType])
 
-  // 判断是否为 Windows 路径格式
-  const isWindowsPath = (path: string): boolean => {
-    return path.includes('\\')
-  }
-
-  // 规范化路径分隔符
-  const normalizePath = (path: string): string => {
-    return path.replace(/\\/g, '/')
-  }
-
   // 生成面包屑导航数据
   const getBreadcrumbs = () => {
-    const isWindows = isWindowsPath(currentPath)
-
-    // 规范化路径用于分割
-    const normalizedPath = normalizePath(currentPath)
-    const parts = normalizedPath.split('/').filter(Boolean)
-
-    const breadcrumbs = [
-      {
-        title: '根目录',
-        path: isWindows ? '\\' : '/',
-      },
-    ]
+    const parts = currentPath.split('/').filter(Boolean)
+    const breadcrumbs = [{ title: '根目录', path: '/' }]
 
     let fullPath = ''
 
     parts.forEach((part) => {
-      if (isWindows) {
-        fullPath += `\\${part}`
-      } else {
-        fullPath += `/${part}`
-      }
+      fullPath += `/${part}`
       breadcrumbs.push({ title: part, path: fullPath })
     })
 
@@ -158,33 +127,14 @@ export default function StoragePage() {
     }
   }
 
-  // 构建子路径
-  const buildChildPath = (parentPath: string, childName: string): string => {
-    const isWindows = isWindowsPath(parentPath)
-    const separator = isWindows ? '\\' : '/'
-
-    // 处理根目录情况
-    if (parentPath === '/' || parentPath === '\\') {
-      return isWindows ? `\\${childName}` : `/${childName}`
-    }
-
-    // 检查父路径是否已经以分隔符结尾
-    const hasTrailingSeparator =
-      parentPath.endsWith('/') || parentPath.endsWith('\\')
-
-    if (hasTrailingSeparator) {
-      return parentPath + childName
-    } else {
-      return parentPath + separator + childName
-    }
-  }
-
   const handleCreateFolder = async () => {
     const name = prompt('请输入文件夹名称:')
 
     if (name && storageType) {
       try {
-        const folderPath = buildChildPath(currentPath, name)
+        const folderPath = currentPath.endsWith('/')
+          ? currentPath + name
+          : currentPath + '/' + name
 
         await StorageService.Mkdir(storageType, folderPath)
         showSuccess('文件夹创建成功')
@@ -209,7 +159,9 @@ export default function StoragePage() {
         try {
           for (let i = 0; i < files.length; i++) {
             const file = files[i]
-            const targetPath = buildChildPath(currentPath, file.name)
+            const targetPath = currentPath.endsWith('/')
+              ? currentPath + file.name
+              : currentPath + '/' + file.name
 
             await StorageService.Upload(storageType, targetPath, file)
           }
@@ -411,12 +363,7 @@ export default function StoragePage() {
                   const key = Array.from(keys)[0] as string
 
                   setStorageType(key)
-                  // 根据存储类型设置正确的根路径
-                  const isWindowsStorage =
-                    key.toLowerCase().includes('local') ||
-                    key.toLowerCase().includes('windows')
-
-                  setCurrentPath(isWindowsStorage ? '\\' : '/') // 切换存储器时重置路径
+                  setCurrentPath('/') // 切换存储器时重置路径
                 }}
               >
                 {providers.map((provider) => (
@@ -439,7 +386,7 @@ export default function StoragePage() {
                     >
                       {index > 0 && (
                         <span className="text-foreground-400 flex-shrink-0">
-                          {isWindowsPath(currentPath) ? '\\' : '/'}
+                          /
                         </span>
                       )}
                       <Button

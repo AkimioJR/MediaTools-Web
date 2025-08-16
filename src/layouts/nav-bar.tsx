@@ -26,7 +26,7 @@ export function NavBar() {
   }, [location.pathname])
 
   const handleOpenMediaRecognition = async () => {
-    await openModal(() => <MediaRecognitionDialog />, {
+    await openModal(() => <MediaRecognitionDialog defaultValue="" />, {
       title: '媒体识别',
       size: window.innerWidth < 768 ? '3xl' : '4xl',
     })
