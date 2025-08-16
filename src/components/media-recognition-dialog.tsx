@@ -352,27 +352,28 @@ const MediaDetail = React.memo(function MediaDetail({
     tabItems.splice(2, 0, tvTab)
   }
 
-  // 在最后添加规则信息tab
-  tabItems.push({
-    key: 'rules',
-    title: '规则信息',
-    content: (
-      <div className="space-y-4">
+  if (mediaResp.custom_rule || mediaResp.meta_rule) {
+    tabItems.push({
+      key: 'rules',
+      title: '规则信息',
+      content: (
         <div className="space-y-4">
-          <p className="text-sm font-medium text-default-600">自定义规则</p>
-          <p className="text-default-900 font-mono text-sm bg-default-100 p-2 rounded">
-            {mediaResp.custom_rule}
-          </p>
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-default-600">自定义规则</p>
+            <p className="text-default-900 font-mono text-sm bg-default-100 p-2 rounded">
+              {mediaResp.custom_rule}
+            </p>
+          </div>
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-default-600">元数据规则</p>
+            <p className="text-default-900 font-mono text-sm bg-default-100 p-2 rounded">
+              {mediaResp.meta_rule}
+            </p>
+          </div>
         </div>
-        <div className="space-y-4">
-          <p className="text-sm font-medium text-default-600">元数据规则</p>
-          <p className="text-default-900 font-mono text-sm bg-default-100 p-2 rounded">
-            {mediaResp.meta_rule}
-          </p>
-        </div>
-      </div>
-    ),
-  })
+      ),
+    })
+  }
 
   return (
     <motion.div
