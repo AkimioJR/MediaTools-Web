@@ -33,7 +33,7 @@ export const StorageService = {
       params: { path },
     })
   },
-  
+
   async List(storage_type: string, path: string): Promise<string[]> {
     return await api.get(`/storage/${storage_type}/list`, {
       params: { path },
@@ -41,7 +41,7 @@ export const StorageService = {
   },
 
   async ListDetail(storage_type: string, path: string): Promise<FileInfo[]> {
-    return await api.get(`/storage/${storage_type}/list`, {
+    return await api.get(`/storage/${storage_type}/list_detail`, {
       params: { path },
     })
   },

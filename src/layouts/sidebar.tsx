@@ -3,6 +3,7 @@ import { Wand2 } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { cn } from '@/utils/twUtils'
 import { SidebarMenus } from '@/components/sidebar-menus'
+import { Icon } from '@/components/icon'
 
 export function Sidebar() {
   const { isOpenSidebar } = useAppStore()
@@ -18,7 +19,7 @@ export function Sidebar() {
         <div className="p-4">
           <div className="flex items-center gap-3">
             <div className="flex aspect-square size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 text-white">
-              <Wand2 className="size-5" />
+              <Icon icon={Wand2} size="md" color="inherit" />
             </div>
             <div>
               <h2 className="font-semibold">MediaTools</h2>

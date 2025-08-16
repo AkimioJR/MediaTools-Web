@@ -4,6 +4,7 @@ import { useMemo, memo } from 'react'
 
 import { cn } from '@/utils'
 import { siteConfig } from '@/config/site'
+import { MenuIcon } from '@/components/icon'
 
 interface SidebarMenusProps {
   onItemClick?: () => void
@@ -91,7 +92,7 @@ export const SidebarMenus = memo(function SidebarMenus({
             href={item.href}
             startContent={
               <div className={getIconStyles(item.href, isSelected)}>
-                <item.icon className="w-5 h-5" />
+                <MenuIcon icon={item.icon} />
               </div>
             }
           >

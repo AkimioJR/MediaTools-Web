@@ -11,6 +11,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalFooter,
+  useDisclosure,
 } from '@heroui/modal'
 import { Button } from '@heroui/button'
 
@@ -34,12 +35,6 @@ type ModalRenderer<Result = unknown> = (
   controls: ModalControls<Result>,
 ) => React.ReactNode
 
-interface ModalState<Result = unknown> {
-  isOpen: boolean
-  options: OpenModalOptions
-  renderer: ModalRenderer<Result> | null
-}
-
 interface ModalContextValue {
   openModal: <Result = unknown>(
     renderer: ModalRenderer<Result>,
@@ -59,46 +54,58 @@ export function useModal() {
 }
 
 export function ModalProvider({ children }: { children: React.ReactNode }) {
-  const [modalState, setModalState] = useState<ModalState>({
-    isOpen: false,
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const [modalState, setModalState] = useState<{
+    options: OpenModalOptions
+    renderer: ModalRenderer | null
+  }>({
     options: {},
     renderer: null,
   })
 
   const resolverRef = useRef<((value: any) => void) | null>(null)
 
-  const doClose = useCallback((result?: unknown) => {
-    setModalState((prev) => ({ ...prev, isOpen: false }))
+  const handleModalClose = useCallback((result?: unknown) => {
     const resolver = resolverRef.current
 
     resolverRef.current = null
-    if (resolver) resolver(result)
-    // 延迟清理内容以便关闭动画
+    // 延迟清理以确保动画完成
     setTimeout(() => {
-      setModalState({ isOpen: false, options: {}, renderer: null })
-    }, 150)
+      setModalState({ options: {}, renderer: null })
+      if (resolver) resolver(result)
+    }, 300)
   }, [])
 
   const openModal = useCallback<ModalContextValue['openModal']>(
     async (renderer, options = {}) => {
       return new Promise((resolve) => {
         resolverRef.current = resolve
-        setModalState({ isOpen: true, options, renderer })
+        setModalState({
+          options,
+          renderer,
+        })
+        onOpen()
       })
     },
-    [],
+    [onOpen],
   )
 
   const closeModal = useCallback(
-    (result?: unknown) => doClose(result),
-    [doClose],
+    (result?: unknown) => {
+      handleModalClose(result)
+      onOpenChange()
+    },
+    [handleModalClose, onOpenChange],
   )
 
   const controls: ModalControls = {
-    close: (result?: unknown) => doClose(result),
+    close: (result?: unknown) => {
+      handleModalClose(result)
+      onOpenChange()
+    },
   }
 
-  const { isOpen, options, renderer } = modalState
+  const { options, renderer } = modalState
 
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
@@ -108,33 +115,26 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         hideCloseButton={options.hideCloseButton}
         isOpen={isOpen}
         size={(options.size as any) || 'lg'}
-        onClose={() =>
-          options.closeOnOverlayClick === false ? undefined : doClose()
-        }
+        onOpenChange={(open) => {
+          if (!open) {
+            handleModalClose()
+          }
+          onOpenChange()
+        }}
       >
         <ModalContent>
           {(onClose) => (
             <>
               {options.title && <ModalHeader>{options.title}</ModalHeader>}
-              <ModalBody>{renderer ? renderer(controls) : null}</ModalBody>
+              <ModalBody className="py-6">
+                {renderer ? renderer(controls) : null}
+              </ModalBody>
               {options.showFooter && (
                 <ModalFooter>
-                  <Button
-                    variant="light"
-                    onPress={() => {
-                      onClose()
-                      doClose(undefined)
-                    }}
-                  >
+                  <Button variant="light" onPress={onClose}>
                     {options.cancelText || '取消'}
                   </Button>
-                  <Button
-                    color="primary"
-                    onPress={() => {
-                      onClose()
-                      doClose(true)
-                    }}
-                  >
+                  <Button color="primary" onPress={onClose}>
                     {options.confirmText || '确定'}
                   </Button>
                 </ModalFooter>
