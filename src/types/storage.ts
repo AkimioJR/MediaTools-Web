@@ -3,14 +3,14 @@ export interface StorageProviderInterface {
   transfer_type: string[]
 }
 
-export interface FileInfo {
+export interface StorageFileInfo {
   storage_type: string
   path: string
   name: string
   ext: string
-  size: number
-  is_dir: boolean
-  mod_time: string
+  size?: number
+  is_dir?: boolean
+  mod_time?: string
 }
 
 export interface StorageProvider {

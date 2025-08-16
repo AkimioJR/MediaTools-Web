@@ -1,4 +1,4 @@
-import type { FileInfo, StorageProviderInterface } from '@/types/storage'
+import type { StorageFileInfo, StorageProviderInterface } from '@/types/storage'
 
 import { Card, CardBody } from '@heroui/card'
 import {
@@ -35,7 +35,7 @@ import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 export default function StoragePage() {
   const [currentPath, setCurrentPath] = useState('/')
   const [storageType, setStorageType] = useState('')
-  const [files, setFiles] = useState<FileInfo[]>([])
+  const [files, setFiles] = useState<StorageFileInfo[]>([])
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -123,7 +123,7 @@ export default function StoragePage() {
   }
 
   // 文件操作处理函数
-  const handleFileClick = (file: FileInfo) => {
+  const handleFileClick = (file: StorageFileInfo) => {
     if (file.is_dir) {
       setCurrentPath(file.path)
     }
@@ -180,14 +180,14 @@ export default function StoragePage() {
     input.click()
   }
 
-  const handleRecognizeSelectedMedia = async (file: FileInfo) => {
+  const handleRecognizeSelectedMedia = async (file: StorageFileInfo) => {
     await openModal(() => <MediaRecognitionDialog defaultValue={file.name} />, {
       title: '媒体识别',
       size: window.innerWidth < 768 ? '3xl' : '4xl',
     })
   }
 
-  const handleDownload = async (file: FileInfo) => {
+  const handleDownload = async (file: StorageFileInfo) => {
     try {
       await StorageService.DownloadFile(storageType, file.path, file.name)
       showSuccess('文件下载开始')
@@ -196,7 +196,7 @@ export default function StoragePage() {
     }
   }
 
-  const handleDelete = async (file: FileInfo) => {
+  const handleDelete = async (file: StorageFileInfo) => {
     if (confirm(`确定要删除 "${file.name}" 吗？`)) {
       try {
         await StorageService.Delete(storageType, file.path)
@@ -258,7 +258,7 @@ export default function StoragePage() {
     )
   }
 
-  const openCopyModal = async (file: FileInfo) => {
+  const openCopyModal = async (file: StorageFileInfo) => {
     const result = await openModal<
       { provider: string; path: string } | undefined
     >(
@@ -289,7 +289,7 @@ export default function StoragePage() {
     }
   }
 
-  const openMoveModal = async (file: FileInfo) => {
+  const openMoveModal = async (file: StorageFileInfo) => {
     const result = await openModal<
       { provider: string; path: string } | undefined
     >(
@@ -336,7 +336,7 @@ export default function StoragePage() {
   }
 
   // 获取文件图标
-  const getFileIcon = (file: FileInfo) => {
+  const getFileIcon = (file: StorageFileInfo) => {
     if (file.is_dir) {
       return <Folder className="w-5 h-5 text-amber-500" />
     }
