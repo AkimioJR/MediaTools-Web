@@ -117,7 +117,7 @@ export default function StoragePage() {
   }
 
   const handleFileClick = (file: StorageFileInfo) => {
-    if (file.is_dir) {
+    if (file.type === 'Directory') {
       setCurrentPath(file.path)
     }
   }
@@ -327,7 +327,7 @@ export default function StoragePage() {
   }
 
   const getFileIcon = (file: StorageFileInfo) => {
-    if (file.is_dir) {
+    if (file.type === 'Directory') {
       return <Folder className="w-5 h-5 text-amber-500" />
     }
 
@@ -470,7 +470,7 @@ export default function StoragePage() {
                           </span>
                           {/* 移动端显示文件大小 */}
                           <span className="text-xs text-foreground-500 sm:hidden">
-                            {file.is_dir
+                            {file.type === 'Directory'
                               ? '文件夹'
                               : formatFileSize(file.size ?? 0)}
                           </span>
@@ -478,7 +478,9 @@ export default function StoragePage() {
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      {file.is_dir ? '-' : formatFileSize(file.size ?? 0)}
+                      {file.type === 'Directory'
+                        ? '-'
+                        : formatFileSize(file.size ?? 0)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <span className="text-xs sm:text-sm text-foreground-500">
@@ -496,7 +498,7 @@ export default function StoragePage() {
                         >
                           <ScanSearch className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
-                        {!file.is_dir && (
+                        {file.type !== 'Directory' && (
                           <Button
                             isIconOnly
                             aria-label="下载"
