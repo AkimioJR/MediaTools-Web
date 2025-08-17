@@ -14,9 +14,6 @@ import { RecognizeService } from '@/services/recognize'
 import { TMDBService } from '@/services/tmdb'
 import { CustomTabs, type TabItem } from '@/components/custom-tabs'
 
-// 全局图片缓存
-const imageCache = new Map<string, string>()
-
 // 缓存图片组件，避免重新渲染时闪烁
 const CachedImage = React.memo(function CachedImage({
   src,
@@ -32,12 +29,6 @@ const CachedImage = React.memo(function CachedImage({
 }) {
   const [imageError, setImageError] = useState(false)
 
-  const cachedSrc = useMemo(() => {
-    if (!src) return ''
-
-    return imageCache.get(src) || src
-  }, [src])
-
   useEffect(() => {
     setImageError(false)
   }, [src])
@@ -49,10 +40,6 @@ const CachedImage = React.memo(function CachedImage({
 
   const handleLoad = useCallback(() => {
     setImageError(false)
-
-    if (src) {
-      imageCache.set(src, src)
-    }
   }, [src])
 
   if ((!src || imageError) && !isLoading) {
@@ -75,7 +62,7 @@ const CachedImage = React.memo(function CachedImage({
         className="full"
         isLoading={isLoading}
         radius="lg"
-        src={cachedSrc}
+        src={src}
         onError={handleError}
         onLoad={handleLoad}
       />
