@@ -8,10 +8,13 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  getKeyValue,
 } from '@heroui/table'
 import { Button } from '@heroui/button'
+import { Spinner } from '@heroui/spinner'
 import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
+import { Switch } from '@heroui/switch'
 import { Pagination } from '@heroui/pagination'
 import {
   File,
@@ -26,6 +29,7 @@ import {
   ScanSearch,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useAsyncList } from '@react-stately/data'
 
 import { StorageService } from '@/services/storage'
 import { showSuccess, handleApiError } from '@/utils/message'
@@ -35,13 +39,117 @@ import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 export default function StoragePage() {
   const [currentPath, setCurrentPath] = useState('')
   const [storageType, setStorageType] = useState('')
-  const [files, setFiles] = useState<StorageFileInfo[]>([])
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
-  const [loading, setLoading] = useState(false)
+
+  const getSavedSortDescriptor = () => {
+    try {
+      const saved = localStorage.getItem('storage-table-sort')
+
+      return saved
+        ? JSON.parse(saved)
+        : { column: 'name', direction: 'ascending' }
+    } catch (_) {
+      return { column: 'name', direction: 'ascending' }
+    }
+  }
+
+  const fileList = useAsyncList<StorageFileInfo>({
+    async load({}) {
+      if (!storageType) {
+        return { items: [] }
+      }
+
+      try {
+        const files = await StorageService.List(storageType, currentPath, true)
+
+        // 有些item没有size 属性 重置为0
+        const processedFiles = files.map((file) => ({
+          ...file,
+          size: file.size || 0,
+        }))
+
+        return { items: processedFiles }
+      } catch (error) {
+        handleApiError(error, '加载文件列表失败')
+
+        return { items: [] }
+      }
+    },
+    async sort({ items, sortDescriptor }) {
+      if (sortDescriptor) {
+        localStorage.setItem(
+          'storage-table-sort',
+          JSON.stringify(sortDescriptor),
+        )
+      }
+
+      return {
+        items: items.sort((a, b) => {
+          const column = sortDescriptor.column
+          const isAscending = sortDescriptor.direction === 'ascending'
+
+          // 特殊处理文件夹和文件的比较
+          const isADirectory = a.type === 'Directory'
+          const isBDirectory = b.type === 'Directory'
+
+          // // 如果按名称排序，则文件夹和文件混合排序
+          // // 如果按大小或日期排序，则文件夹始终在前
+          // if (column !== 'name' && isADirectory !== isBDirectory) {
+          //   return isADirectory ? -1 : 1
+          // }
+
+          let result
+
+          switch (column) {
+            case 'name':
+              result = a.name.localeCompare(b.name)
+              break
+
+            case 'mod_time':
+              // 日期排序：转换为时间戳进行比较
+              const aTime = a.mod_time ? new Date(a.mod_time).getTime() : 0
+              const bTime = b.mod_time ? new Date(b.mod_time).getTime() : 0
+
+              result = aTime - bTime
+              break
+
+            case 'size':
+              const aSize = isADirectory ? 0 : Number(a.size || 0)
+              const bSize = isBDirectory ? 0 : Number(b.size || 0)
+
+              result = aSize - bSize
+              break
+
+            default:
+              result = 0
+          }
+
+          return isAscending ? result : -result
+        }),
+      }
+    },
+    getKey: (item) => item.path,
+    initialSortDescriptor: getSavedSortDescriptor(),
+  })
 
   const { openModal } = useModal()
 
   const [uploading, setUploading] = useState(false)
+
+  const getShowHiddenFilesSetting = () => {
+    try {
+      const saved = localStorage.getItem('storage-show-hidden-files')
+
+      return saved === 'true'
+    } catch (_) {
+      return false
+    }
+  }
+
+  const [showHiddenFiles, setShowHiddenFiles] = useState(
+    getShowHiddenFilesSetting(),
+  )
+  const [inputPath, setInputPath] = useState('')
 
   const [page, setPage] = useState(1)
   const rowsPerPage = 20
@@ -65,27 +173,14 @@ export default function StoragePage() {
   }, [])
 
   useEffect(() => {
-    if (!storageType) return
-
-    const loadFiles = async () => {
-      setLoading(true)
-      try {
-        const fileList = await StorageService.List(
-          storageType,
-          currentPath,
-          true,
-        )
-
-        setFiles(fileList)
-      } catch (error) {
-        handleApiError(error, '加载文件列表失败')
-      } finally {
-        setLoading(false)
-      }
+    if (storageType) {
+      fileList.reload()
     }
-
-    loadFiles()
   }, [currentPath, storageType])
+
+  const isWinRootPath = (path: string) => {
+    return path.endsWith(':')
+  }
 
   const getBreadcrumbs = () => {
     const parts = currentPath.split('/').filter(Boolean)
@@ -93,8 +188,13 @@ export default function StoragePage() {
 
     let fullPath = ''
 
-    parts.forEach((part) => {
-      fullPath += `/${part}`
+    parts.forEach((part, index) => {
+      if (index === 0 && isWinRootPath(part)) {
+        fullPath += `${part}`
+      } else {
+        fullPath += `/${part}`
+      }
+
       breadcrumbs.push({ title: part, path: fullPath })
     })
 
@@ -102,24 +202,19 @@ export default function StoragePage() {
   }
 
   const reloadFiles = async () => {
-    if (!storageType) return
-
-    setLoading(true)
-    try {
-      const fileList = await StorageService.List(storageType, currentPath, true)
-
-      setFiles(fileList)
-    } catch (error) {
-      handleApiError(error, '重新加载文件列表失败')
-    } finally {
-      setLoading(false)
-    }
+    await fileList.reload()
   }
 
   const handleFileClick = (file: StorageFileInfo) => {
     if (file.type === 'Directory') {
       setCurrentPath(file.path)
     }
+  }
+
+  const handlePathNavigation = () => {
+    if (!storageType) return
+
+    setCurrentPath(inputPath)
   }
 
   const handleCreateFolder = async () => {
@@ -334,12 +429,56 @@ export default function StoragePage() {
     return <File className="w-5 h-5 text-gray-500" />
   }
 
-  const pages = Math.ceil(files.length / rowsPerPage)
-  const items = files.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+  const filteredItems = showHiddenFiles
+    ? fileList.items
+    : fileList.items.filter((file) => !file.name.startsWith('.'))
+
+  const pages = Math.ceil(filteredItems.length / rowsPerPage)
+
+  // 当过滤条件改变导致总页数减少，且当前页码超出总页数时，自动调整页码
+  useEffect(() => {
+    if (page > pages && pages > 0) {
+      setPage(pages)
+    }
+  }, [pages, page])
+
+  const items = filteredItems.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage,
+  )
+
+  const columns = [
+    {
+      key: 'name',
+      label: '名称',
+    },
+    {
+      key: 'size',
+      label: '大小',
+      className: 'hidden sm:table-cell',
+    },
+    {
+      key: 'mod_time',
+      label: '修改时间',
+      className: 'hidden md:table-cell',
+    },
+    {
+      key: 'actions',
+      label: '操作',
+      className: 'sm:w-[200px]',
+    },
+  ]
 
   useEffect(() => {
     setPage(1)
-  }, [files.length])
+  }, [fileList.items.length])
+
+  useEffect(() => {
+    localStorage.setItem(
+      'storage-show-hidden-files',
+      showHiddenFiles.toString(),
+    )
+  }, [showHiddenFiles])
 
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
@@ -360,7 +499,7 @@ export default function StoragePage() {
                   const key = Array.from(keys)[0] as string
 
                   setStorageType(key)
-                  setCurrentPath('/') // 切换存储器时重置路径
+                  setCurrentPath('')
                 }}
               >
                 {providers.map((provider) => (
@@ -387,7 +526,7 @@ export default function StoragePage() {
                         </span>
                       )}
                       <Button
-                        className="h-6 px-2 min-w-0 text-xs whitespace-nowrap flex-shrink-0"
+                        className="h-6 px-1 min-w-0 text-xs whitespace-nowrap flex-shrink-0"
                         size="sm"
                         variant="light"
                         onPress={() => setCurrentPath(breadcrumb.path)}
@@ -400,28 +539,57 @@ export default function StoragePage() {
               </div>
             </div>
 
+            <div className="flex items-center gap-2">
+              <Input
+                label="输入跳转路径回车进行跳转"
+                placeholder={`例如: ${currentPath}`}
+                size="sm"
+                value={inputPath}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handlePathNavigation()
+                  }
+                }}
+                onValueChange={setInputPath}
+              />
+            </div>
+
             {/* 操作按钮 */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                color="primary"
-                isDisabled={!storageType}
-                size="sm"
-                startContent={<FolderPlus className="w-4 h-4" />}
-                variant="solid"
-                onPress={handleCreateFolder}
-              >
-                新建文件夹
-              </Button>
-              <Button
-                color="success"
-                isDisabled={!storageType || uploading}
-                size="sm"
-                startContent={<Upload className="w-4 h-4" />}
-                variant="solid"
-                onPress={handleUpload}
-              >
-                {uploading ? '上传中...' : '上传文件'}
-              </Button>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button
+                  color="primary"
+                  isDisabled={!storageType}
+                  size="sm"
+                  startContent={<FolderPlus className="w-4 h-4" />}
+                  variant="solid"
+                  onPress={handleCreateFolder}
+                >
+                  新建文件夹
+                </Button>
+                <Button
+                  color="success"
+                  isDisabled={!storageType || uploading}
+                  size="sm"
+                  startContent={<Upload className="w-4 h-4" />}
+                  variant="solid"
+                  onPress={handleUpload}
+                >
+                  {uploading ? '上传中...' : '上传文件'}
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm text-foreground-500">
+                  显示隐藏文件
+                </span>
+                <Switch
+                  aria-label="显示隐藏文件"
+                  isSelected={showHiddenFiles}
+                  size="sm"
+                  onValueChange={setShowHiddenFiles}
+                />
+              </div>
             </div>
           </div>
         </CardBody>
@@ -439,114 +607,144 @@ export default function StoragePage() {
                 th: 'bg-default-100 text-xs sm:text-sm',
                 td: 'py-2 sm:py-3 text-xs sm:text-sm',
               }}
+              sortDescriptor={fileList.sortDescriptor}
+              onSortChange={fileList.sort}
             >
-              <TableHeader>
-                <TableColumn>名称</TableColumn>
-                <TableColumn className="hidden sm:table-cell">大小</TableColumn>
-                <TableColumn className="hidden md:table-cell">
-                  修改时间
-                </TableColumn>
-                <TableColumn className="sm:w-[200px]" width={120}>
-                  操作
-                </TableColumn>
+              <TableHeader columns={columns}>
+                {(column) => (
+                  <TableColumn
+                    key={column.key}
+                    allowsSorting={
+                      column.key === 'name' ||
+                      column.key === 'mod_time' ||
+                      column.key === 'size'
+                    }
+                    className={column.className}
+                  >
+                    {column.label}
+                  </TableColumn>
+                )}
               </TableHeader>
               <TableBody
                 emptyContent="此目录为空"
-                isLoading={loading}
-                loadingContent="加载中..."
+                isLoading={fileList.isLoading}
+                items={items}
+                loadingContent={<Spinner label="加载中..." />}
               >
-                {items.map((file) => (
+                {(file) => (
                   <TableRow
                     key={file.path}
                     className="cursor-pointer hover:bg-content2"
                     onClick={() => handleFileClick(file)}
                   >
-                    <TableCell>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        {getFileIcon(file)}
-                        <div className="min-w-0 flex-1">
-                          <span className="font-medium text-xs sm:text-sm truncate block">
-                            {file.name}
-                          </span>
-                          {/* 移动端显示文件大小 */}
-                          <span className="text-xs text-foreground-500 sm:hidden">
-                            {file.type === 'Directory'
-                              ? '文件夹'
-                              : formatFileSize(file.size ?? 0)}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {file.type === 'Directory'
-                        ? '-'
-                        : formatFileSize(file.size ?? 0)}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <span className="text-xs sm:text-sm text-foreground-500">
-                        {formatDate(file.mod_time ?? '')}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          isIconOnly
-                          aria-label="识别媒体"
-                          size="sm"
-                          variant="light"
-                          onPress={() => handleRecognizeSelectedMedia(file)}
-                        >
-                          <ScanSearch className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </Button>
-                        {file.type !== 'Directory' && (
-                          <Button
-                            isIconOnly
-                            aria-label="下载"
-                            size="sm"
-                            variant="light"
-                            onPress={() => handleDownload(file)}
-                          >
-                            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                        )}
-
-                        <Button
-                          isIconOnly
-                          aria-label="复制"
-                          size="sm"
-                          variant="light"
-                          onPress={() => openCopyModal(file)}
-                        >
-                          <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          aria-label="移动"
-                          size="sm"
-                          variant="light"
-                          onPress={() => openMoveModal(file)}
-                        >
-                          <Move className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          aria-label="删除"
-                          size="sm"
-                          variant="light"
-                          onPress={() => handleDelete(file)}
-                        >
-                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-danger" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    {(columnKey) => {
+                      switch (columnKey) {
+                        case 'name':
+                          return (
+                            <TableCell>
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                {getFileIcon(file)}
+                                <div className="min-w-0 flex-1">
+                                  <span className="font-medium text-xs sm:text-sm truncate block">
+                                    {file.name}
+                                  </span>
+                                  <span className="text-xs text-foreground-500 sm:hidden">
+                                    {file.type === 'Directory'
+                                      ? '文件夹'
+                                      : formatFileSize(file.size ?? 0)}
+                                  </span>
+                                </div>
+                              </div>
+                            </TableCell>
+                          )
+                        case 'size':
+                          return (
+                            <TableCell>
+                              {file.type === 'Directory'
+                                ? '-'
+                                : formatFileSize(file.size ?? 0)}
+                            </TableCell>
+                          )
+                        case 'mod_time':
+                          return (
+                            <TableCell>
+                              <span className="text-xs sm:text-sm text-foreground-500">
+                                {formatDate(file.mod_time ?? '')}
+                              </span>
+                            </TableCell>
+                          )
+                        case 'actions':
+                          return (
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  isIconOnly
+                                  aria-label="识别媒体"
+                                  size="sm"
+                                  variant="light"
+                                  onPress={() =>
+                                    handleRecognizeSelectedMedia(file)
+                                  }
+                                >
+                                  <ScanSearch className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </Button>
+                                {file.type !== 'Directory' && (
+                                  <Button
+                                    isIconOnly
+                                    aria-label="下载"
+                                    size="sm"
+                                    variant="light"
+                                    onPress={() => handleDownload(file)}
+                                  >
+                                    <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  </Button>
+                                )}
+                                <Button
+                                  isIconOnly
+                                  aria-label="复制"
+                                  size="sm"
+                                  variant="light"
+                                  onPress={() => openCopyModal(file)}
+                                >
+                                  <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </Button>
+                                <Button
+                                  isIconOnly
+                                  aria-label="移动"
+                                  size="sm"
+                                  variant="light"
+                                  onPress={() => openMoveModal(file)}
+                                >
+                                  <Move className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </Button>
+                                <Button
+                                  isIconOnly
+                                  aria-label="删除"
+                                  size="sm"
+                                  variant="light"
+                                  onPress={() => handleDelete(file)}
+                                >
+                                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-danger" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          )
+                        default:
+                          return (
+                            <TableCell>
+                              {getKeyValue(file, columnKey as string)}
+                            </TableCell>
+                          )
+                      }
+                    }}
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
 
           {/* 分页组件 */}
-          {files.length > 0 && (
+          {filteredItems.length > 0 && (
             <div className="flex justify-center py-3 sm:py-4">
               <Pagination
                 showControls
