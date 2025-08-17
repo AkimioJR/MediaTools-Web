@@ -89,7 +89,7 @@ export default function StoragePage() {
 
   const getBreadcrumbs = () => {
     const parts = currentPath.split('/').filter(Boolean)
-    const breadcrumbs = [{ title: '根目录', path: '/' }]
+    const breadcrumbs = [{ title: '根目录', path: '' }]
 
     let fullPath = ''
 
