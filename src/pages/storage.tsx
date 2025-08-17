@@ -33,23 +33,19 @@ import { useModal } from '@/components/modal-provider'
 import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 
 export default function StoragePage() {
-  const [currentPath, setCurrentPath] = useState('/')
+  const [currentPath, setCurrentPath] = useState('')
   const [storageType, setStorageType] = useState('')
   const [files, setFiles] = useState<StorageFileInfo[]>([])
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
   const [loading, setLoading] = useState(false)
 
-  // 全局模态
   const { openModal } = useModal()
 
-  // 上传状态
   const [uploading, setUploading] = useState(false)
 
-  // 分页状态
   const [page, setPage] = useState(1)
   const rowsPerPage = 20
 
-  // 加载存储提供者列表
   useEffect(() => {
     const loadProviders = async () => {
       try {
@@ -68,16 +64,16 @@ export default function StoragePage() {
     loadProviders()
   }, [])
 
-  // 加载文件列表
   useEffect(() => {
     if (!storageType) return
 
     const loadFiles = async () => {
       setLoading(true)
       try {
-        const fileList = await StorageService.ListDetail(
+        const fileList = await StorageService.List(
           storageType,
           currentPath,
+          true,
         )
 
         setFiles(fileList)
@@ -91,7 +87,6 @@ export default function StoragePage() {
     loadFiles()
   }, [currentPath, storageType])
 
-  // 生成面包屑导航数据
   const getBreadcrumbs = () => {
     const parts = currentPath.split('/').filter(Boolean)
     const breadcrumbs = [{ title: '根目录', path: '/' }]
@@ -106,13 +101,12 @@ export default function StoragePage() {
     return breadcrumbs
   }
 
-  // 重新加载文件列表
   const reloadFiles = async () => {
     if (!storageType) return
 
     setLoading(true)
     try {
-      const fileList = await StorageService.ListDetail(storageType, currentPath)
+      const fileList = await StorageService.List(storageType, currentPath, true)
 
       setFiles(fileList)
     } catch (error) {
@@ -122,7 +116,6 @@ export default function StoragePage() {
     }
   }
 
-  // 文件操作处理函数
   const handleFileClick = (file: StorageFileInfo) => {
     if (file.is_dir) {
       setCurrentPath(file.path)
@@ -320,7 +313,6 @@ export default function StoragePage() {
     }
   }
 
-  // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B'
     const k = 1024
@@ -330,12 +322,10 @@ export default function StoragePage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  // 格式化日期
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleString('zh-CN')
   }
 
-  // 获取文件图标
   const getFileIcon = (file: StorageFileInfo) => {
     if (file.is_dir) {
       return <Folder className="w-5 h-5 text-amber-500" />
@@ -344,11 +334,9 @@ export default function StoragePage() {
     return <File className="w-5 h-5 text-gray-500" />
   }
 
-  // 分页逻辑
   const pages = Math.ceil(files.length / rowsPerPage)
   const items = files.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  // 当文件列表变化时，重置到第一页
   useEffect(() => {
     setPage(1)
   }, [files.length])
@@ -482,17 +470,19 @@ export default function StoragePage() {
                           </span>
                           {/* 移动端显示文件大小 */}
                           <span className="text-xs text-foreground-500 sm:hidden">
-                            {file.is_dir ? '文件夹' : formatFileSize(file.size)}
+                            {file.is_dir
+                              ? '文件夹'
+                              : formatFileSize(file.size ?? 0)}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      {file.is_dir ? '-' : formatFileSize(file.size)}
+                      {file.is_dir ? '-' : formatFileSize(file.size ?? 0)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <span className="text-xs sm:text-sm text-foreground-500">
-                        {formatDate(file.mod_time)}
+                        {formatDate(file.mod_time ?? '')}
                       </span>
                     </TableCell>
                     <TableCell>

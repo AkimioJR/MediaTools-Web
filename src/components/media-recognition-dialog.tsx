@@ -8,6 +8,7 @@ import { Card, CardBody, CardHeader } from '@heroui/card'
 import { Chip } from '@heroui/chip'
 import { Divider } from '@heroui/divider'
 import { Image } from '@heroui/image'
+import { Spinner } from '@heroui/spinner'
 
 import { RecognizeService } from '@/services/recognize'
 import { TMDBService } from '@/services/tmdb'
@@ -21,22 +22,22 @@ const CachedImage = React.memo(function CachedImage({
   src,
   alt,
   onError,
+  isLoading,
 }: {
   src: string
   alt: string
   className?: string
+  isLoading: boolean
   onError?: () => void
 }) {
   const [imageError, setImageError] = useState(false)
 
-  // 检查图片是否已缓存
   const cachedSrc = useMemo(() => {
     if (!src) return ''
 
     return imageCache.get(src) || src
   }, [src])
 
-  // 当src改变时重置状态
   useEffect(() => {
     setImageError(false)
   }, [src])
@@ -49,13 +50,12 @@ const CachedImage = React.memo(function CachedImage({
   const handleLoad = useCallback(() => {
     setImageError(false)
 
-    // 将成功加载的图片URL加入缓存
     if (src) {
       imageCache.set(src, src)
     }
   }, [src])
 
-  if (!src || imageError) {
+  if ((!src || imageError) && !isLoading) {
     return (
       <div className="w-full h-full bg-default-100 rounded-lg flex items-center justify-center border-2 border-dashed border-default-300">
         <div className="text-center text-default-500">
@@ -72,6 +72,8 @@ const CachedImage = React.memo(function CachedImage({
         isBlurred
         isZoomed
         alt={alt}
+        className="full"
+        isLoading={isLoading}
         radius="lg"
         src={cachedSrc}
         onError={handleError}
@@ -94,17 +96,15 @@ const MediaDetail = React.memo(function MediaDetail({
   const [posterUrl, setPosterUrl] = useState<string>('')
   const [overview, setOverview] = useState<string>('')
   const [overviewLoading, setOverviewLoading] = useState<boolean>(false)
+  const [posterLoading, setPosterLoading] = useState<boolean>(false)
   const [overviewError, setOverviewError] = useState<boolean>(false)
 
-  // 用于避免重复请求同一媒体的数据
   const lastRequestedIdRef = useRef<string | null>(null)
 
-  // 使用useCallback稳定化tab切换函数
   const handleTabChange = useCallback((key: string) => {
     setActiveTab(key)
   }, [])
 
-  // 稳定化媒体标识符，避免不必要的重新请求
   const mediaIdentifier = useMemo(() => {
     if (mediaResp?.item?.tmdb_id && mediaResp?.item?.media_type) {
       return {
@@ -116,14 +116,12 @@ const MediaDetail = React.memo(function MediaDetail({
     return null
   }, [mediaResp?.item?.tmdb_id, mediaResp?.item?.media_type])
 
-  // 获取封面图和简介
   useEffect(() => {
     if (!mediaIdentifier) return
 
     const { mediaType, tmdbId } = mediaIdentifier
     const requestId = `${mediaType}-${tmdbId}`
 
-    // 避免重复请求同一媒体的数据
     if (lastRequestedIdRef.current === requestId) {
       return
     }
@@ -133,6 +131,7 @@ const MediaDetail = React.memo(function MediaDetail({
     // 重置状态
     setPosterUrl('')
     setOverviewLoading(true)
+    setPosterLoading(true)
     setOverviewError(false)
     setOverview('')
 
@@ -146,7 +145,9 @@ const MediaDetail = React.memo(function MediaDetail({
       })
       .catch((error) => {
         console.error('Failed to fetch poster:', error)
-        // 图片加载失败时，CachedImage会自动处理
+      })
+      .finally(() => {
+        setPosterLoading(false)
       })
 
     TMDBService.GetOverview(mediaType, tmdbId)
@@ -401,6 +402,7 @@ const MediaDetail = React.memo(function MediaDetail({
                 <CachedImage
                   alt={`${item.title} poster`}
                   className="w-full h-full object-cover rounded-lg"
+                  isLoading={posterLoading}
                   src={posterUrl}
                 />
               </div>
@@ -475,30 +477,46 @@ export function MediaRecognitionDialog({
     }
   }
 
+  const getButtonText = () => {
+    if (isLoading) {
+      return '识别中...'
+    } else if (result || errMsg) {
+      return '再次识别'
+    }
+
+    return '开始识别'
+  }
+
   return (
     <div className="flex flex-col max-h-[85vh] md:max-h-[90vh]">
-      {/* 输入区域 */}
-      <div className="flex gap-3 items-center mb-4 flex-shrink-0">
-        <Input
-          className="flex-1"
-          isDisabled={isLoading}
-          label="请输入媒体名称"
-          value={mediaTitle}
-          onKeyDown={handleKeyPress}
-          onValueChange={setMediaTitle}
-        />
-        <Button
-          className="px-6"
-          color="primary"
-          isDisabled={!mediaTitle.trim() || isLoading}
-          isLoading={isLoading}
-          onPress={() => handleRecognize()}
-        >
-          {isLoading ? '识别中...' : '识别'}
-        </Button>
-      </div>
+      {!defaultValue.trim() && (
+        <div className="flex gap-3 items-center mb-4 flex-shrink-0">
+          <Input
+            className="flex-1"
+            isDisabled={isLoading}
+            label="请输入媒体名称"
+            value={mediaTitle}
+            onKeyDown={handleKeyPress}
+            onValueChange={setMediaTitle}
+          />
+          <Button
+            className="px-6"
+            color="primary"
+            isDisabled={!mediaTitle.trim() || isLoading}
+            isLoading={isLoading}
+            onPress={() => handleRecognize()}
+          >
+            {getButtonText()}
+          </Button>
+        </div>
+      )}
 
-      {/* 结果区域 */}
+      {isLoading && Boolean(defaultValue.trim()) && (
+        <div className="flex justify-center items-center h-full">
+          <Spinner variant="gradient" />
+        </div>
+      )}
+
       <AnimatePresence>
         {(result || errMsg) && (
           <motion.div
@@ -516,7 +534,7 @@ export function MediaRecognitionDialog({
               initial={{ opacity: 0 }}
               transition={{ delay: 0.1, duration: 0.2 }}
             >
-              <Divider className="mb-4" />
+              {!defaultValue.trim() && <Divider className="mb-4" />}
             </motion.div>
             <motion.div
               animate={{ opacity: 1, y: 0 }}
