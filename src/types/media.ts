@@ -1,8 +1,10 @@
+export type MediaType = 'UnknownMediaType' | 'Movie' | 'TV'
+
 export interface MediaItem {
   title: string // 标题
   original_title: string // 原始标题
   year: number // 年份
-  media_type: 'Movie' | 'TV' // 电影、电视剧
+  media_type: MediaType // 电影、电视剧
   part: string // 分段
 
   file_extension: string // 文件扩展名
@@ -34,7 +36,7 @@ export interface MediaItem {
 }
 
 export interface RecognizeMediaDetail {
-  item: MediaItem; // 识别的媒体信息
-  custom_rule: string; // 匹配的自定义规则
-  meta_rule: string; // 应用的媒体规则
+  item: MediaItem // 识别的媒体信息
+  custom_rule: string // 匹配的自定义规则
+  meta_rule: string // 应用的媒体规则
 }
