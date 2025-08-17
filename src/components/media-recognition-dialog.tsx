@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from '@heroui/input'
 import { Button } from '@heroui/button'
 import { Card, CardBody, CardHeader } from '@heroui/card'
+import { Link } from '@heroui/link'
 import { Chip } from '@heroui/chip'
 import { Divider } from '@heroui/divider'
 import { Image } from '@heroui/image'
@@ -87,6 +88,32 @@ const MediaDetail = React.memo(function MediaDetail({
   const [overviewError, setOverviewError] = useState<boolean>(false)
 
   const lastRequestedIdRef = useRef<string | null>(null)
+
+  const renderFields = (
+    fields: Array<{ label: string; value: any; href?: string }>,
+    isFilterEmpty = false,
+  ) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {(isFilterEmpty ? fields.filter((field) => field.value) : fields).map(
+        (field, index) => (
+          <div key={index}>
+            <p className="text-sm font-medium text-default-600">
+              {field.label}
+            </p>
+            <p className="text-default-900">
+              {field.href ? (
+                <Link href={field.href} target="_blank">
+                  {field.value}
+                </Link>
+              ) : (
+                field.value
+              )}
+            </p>
+          </div>
+        ),
+      )}
+    </div>
+  )
 
   const handleTabChange = useCallback((key: string) => {
     setActiveTab(key)
@@ -185,32 +212,33 @@ const MediaDetail = React.memo(function MediaDetail({
       title: '基本信息',
       content: (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-default-600">标题</p>
-              <p className="text-default-900">{item.title}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">原始标题</p>
-              <p className="text-default-900">{item.original_title}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">年份</p>
-              <p className="text-default-900">{item.year}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">媒体类型</p>
-              <p className="text-default-900">{item.media_type}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">TMDB ID</p>
-              <p className="text-default-900">{item.tmdb_id}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">IMDb ID</p>
-              <p className="text-default-900">{item.imdb_id}</p>
-            </div>
-          </div>
+          {renderFields([
+            { label: '标题', value: item.title },
+            { label: '原始标题', value: item.original_title },
+            { label: '年份', value: item.year },
+            { label: '媒体类型', value: item.media_type },
+            {
+              label: 'TMDB ID',
+              value: item.tmdb_id,
+              href: item.tmdb_id
+                ? `https://www.themoviedb.org/${isTV ? 'tv' : 'movie'}/${item.tmdb_id}`
+                : undefined,
+            },
+            {
+              label: 'TVDB ID',
+              value: item.tvdb_id,
+              href: item.tvdb_id
+                ? `https://thetvdb.com/?tab=series&id=${item.tvdb_id}`
+                : undefined,
+            },
+            {
+              label: 'IMDb ID',
+              value: item.imdb_id,
+              href: item.imdb_id
+                ? `https://www.imdb.com/title/${item.imdb_id}`
+                : undefined,
+            },
+          ])}
         </div>
       ),
     },
@@ -246,32 +274,17 @@ const MediaDetail = React.memo(function MediaDetail({
       title: '资源信息',
       content: (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-default-600">分辨率</p>
-              <p className="text-default-900">{item.resource_pix}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">视频编码</p>
-              <p className="text-default-900">{item.video_encode}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">音频编码</p>
-              <p className="text-default-900">{item.audio_encode}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">资源类型</p>
-              <p className="text-default-900">{item.resource_type}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">平台</p>
-              <p className="text-default-900">{item.platform}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">文件扩展名</p>
-              <p className="text-default-900">{item.file_extension}</p>
-            </div>
-          </div>
+          {renderFields(
+            [
+              { label: '分辨率', value: item.resource_pix },
+              { label: '视频编码', value: item.video_encode },
+              { label: '音频编码', value: item.audio_encode },
+              { label: '资源类型', value: item.resource_type },
+              { label: '平台', value: item.platform },
+              { label: '文件扩展名', value: item.file_extension },
+            ],
+            true,
+          )}
 
           {item.release_groups.length > 0 && (
             <div>
@@ -314,24 +327,12 @@ const MediaDetail = React.memo(function MediaDetail({
       title: '电视剧信息',
       content: (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-default-600">季数</p>
-              <p className="text-default-900">{item.season_str}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">集数</p>
-              <p className="text-default-900">{item.episode_str}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">集标题</p>
-              <p className="text-default-900">{item.episode_title}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-600">发布日期</p>
-              <p className="text-default-900">{item.episode_date}</p>
-            </div>
-          </div>
+          {renderFields([
+            { label: '季数', value: item.season_str },
+            { label: '集数', value: item.episode_str },
+            { label: '集标题', value: item.episode_title },
+            { label: '发布日期', value: item.episode_date },
+          ])}
         </div>
       ),
     }
