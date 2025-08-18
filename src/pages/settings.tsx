@@ -504,7 +504,7 @@ function MediaSettings() {
           </div>
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-6">
             <Textarea
               label="电影格式"
               placeholder="例如: {title} ({year})"
