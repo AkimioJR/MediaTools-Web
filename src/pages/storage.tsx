@@ -28,7 +28,7 @@ import {
   FolderPlus,
   ScanSearch,
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAsyncList } from '@react-stately/data'
 
 import { StorageService } from '@/services/storage'
@@ -36,24 +36,135 @@ import { showSuccess, handleApiError } from '@/utils/message'
 import { useModal } from '@/components/modal-provider'
 import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 
+interface FileColumn {
+  key: string
+  label: string
+  className?: string
+  width?: number
+}
+
+interface LoadingStates {
+  providers: boolean
+  files: boolean
+  upload: boolean
+  delete: boolean
+  copy: boolean
+  move: boolean
+}
+
+const ROWS_PER_PAGE = 20
+const STORAGE_KEYS = {
+  SORT_DESCRIPTOR: 'storage-table-sort',
+  SHOW_HIDDEN_FILES: 'storage-show-hidden-files',
+} as const
+
+const TABLE_COLUMNS: FileColumn[] = [
+  { key: 'name', label: '名称' },
+  { key: 'size', label: '大小', className: 'hidden sm:table-cell' },
+  { key: 'mod_time', label: '修改时间', className: 'hidden sm:table-cell' },
+  { key: 'actions', label: '操作', className: 'sm:w-[200px]', width: 120 },
+]
+
+const getSavedSortDescriptor = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.SORT_DESCRIPTOR)
+
+    return saved
+      ? JSON.parse(saved)
+      : { column: 'name', direction: 'ascending' }
+  } catch {
+    return { column: 'name', direction: 'ascending' }
+  }
+}
+
+const getShowHiddenFilesSetting = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_HIDDEN_FILES)
+
+    return saved === 'true'
+  } catch {
+    return false
+  }
+}
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
+const formatDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleString('zh-CN')
+}
+
+const isWinRootPath = (path: string) => path.endsWith(':')
+
 export default function StoragePage() {
   const [currentPath, setCurrentPath] = useState('')
   const [storageType, setStorageType] = useState('')
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
+
   const [showPathInput, setShowPathInput] = useState(false)
   const [pathInputValue, setPathInputValue] = useState('')
+  const [page, setPage] = useState(1)
+  const [showHiddenFiles, setShowHiddenFiles] = useState(
+    getShowHiddenFilesSetting,
+  )
 
-  const getSavedSortDescriptor = () => {
-    try {
-      const saved = localStorage.getItem('storage-table-sort')
+  const [loadingStates, setLoadingStates] = useState<LoadingStates>({
+    providers: false,
+    files: false,
+    upload: false,
+    delete: false,
+    copy: false,
+    move: false,
+  })
 
-      return saved
-        ? JSON.parse(saved)
-        : { column: 'name', direction: 'ascending' }
-    } catch (_) {
-      return { column: 'name', direction: 'ascending' }
+  const { openModal } = useModal()
+
+  const handleAsyncOperation = useCallback(
+    async (
+      operation: () => Promise<void>,
+      loadingKey: keyof LoadingStates,
+      successMessage?: string,
+    ) => {
+      setLoadingStates((prev) => ({ ...prev, [loadingKey]: true }))
+      try {
+        await operation()
+        if (successMessage) showSuccess(successMessage)
+      } catch (error) {
+        handleApiError(error, '操作失败')
+      } finally {
+        setLoadingStates((prev) => ({ ...prev, [loadingKey]: false }))
+      }
+    },
+    [],
+  )
+
+  useEffect(() => {
+    const loadProviders = async () => {
+      await handleAsyncOperation(async () => {
+        const providerList =
+          await StorageService.ProviderService.getProviderList()
+
+        setProviders(providerList)
+        if (providerList.length > 0) {
+          setStorageType(providerList[0].storage_type)
+        }
+      }, 'providers')
     }
-  }
+
+    loadProviders()
+  }, [handleAsyncOperation])
+
+  useEffect(() => {
+    if (storageType) {
+      fileList.reload()
+    }
+  }, [currentPath, storageType])
 
   const fileList = useAsyncList<StorageFileInfo>({
     async load({}) {
@@ -64,7 +175,6 @@ export default function StoragePage() {
       try {
         const files = await StorageService.List(storageType, currentPath, true)
 
-        // 有些item没有size 属性 重置为0
         const processedFiles = files.map((file) => ({
           ...file,
           size: file.size || 0,
@@ -80,113 +190,68 @@ export default function StoragePage() {
     async sort({ items, sortDescriptor }) {
       if (sortDescriptor) {
         localStorage.setItem(
-          'storage-table-sort',
+          STORAGE_KEYS.SORT_DESCRIPTOR,
           JSON.stringify(sortDescriptor),
         )
       }
 
-      return {
-        items: items.sort((a, b) => {
-          const column = sortDescriptor.column
-          const isAscending = sortDescriptor.direction === 'ascending'
+      if (!items || items.length === 0) {
+        return { items }
+      }
 
-          // 特殊处理文件夹和文件的比较
-          const isADirectory = a.type === 'Directory'
-          const isBDirectory = b.type === 'Directory'
+      const sortedItems = [...items].sort((a, b) => {
+        if (!sortDescriptor) return 0
 
-          // // 如果按名称排序，则文件夹和文件混合排序
-          // // 如果按大小或日期排序，则文件夹始终在前
-          // if (column !== 'name' && isADirectory !== isBDirectory) {
-          //   return isADirectory ? -1 : 1
-          // }
+        const column = sortDescriptor.column
+        const isAscending = sortDescriptor.direction === 'ascending'
 
-          let result
+        const isADirectory = a.type === 'Directory'
+        const isBDirectory = b.type === 'Directory'
 
-          switch (column) {
-            case 'name':
-              result = a.name.localeCompare(b.name)
-              break
+        // if (column !== 'name' && isADirectory !== isBDirectory) {
+        //   return isADirectory ? -1 : 1
+        // }
 
-            case 'mod_time':
-              // 日期排序：转换为时间戳进行比较
-              const aTime = a.mod_time ? new Date(a.mod_time).getTime() : 0
-              const bTime = b.mod_time ? new Date(b.mod_time).getTime() : 0
+        let result = 0
 
-              result = aTime - bTime
-              break
+        switch (column) {
+          case 'name':
+            result = (a.name || '').localeCompare(b.name || '')
+            break
 
-            case 'size':
-              const aSize = isADirectory ? 0 : Number(a.size || 0)
-              const bSize = isBDirectory ? 0 : Number(b.size || 0)
+          case 'mod_time': {
+            // 日期排序：转换为时间戳进行比较
+            const aTime = a.mod_time ? new Date(a.mod_time).getTime() : 0
+            const bTime = b.mod_time ? new Date(b.mod_time).getTime() : 0
 
-              result = aSize - bSize
-              break
-
-            default:
-              result = 0
+            result = aTime - bTime
+            break
           }
 
-          return isAscending ? result : -result
-        }),
-      }
+          case 'size': {
+            const aSize = isADirectory ? 0 : Number(a.size || 0)
+            const bSize = isBDirectory ? 0 : Number(b.size || 0)
+
+            result = aSize - bSize
+            break
+          }
+
+          default:
+            result = 0
+        }
+
+        return isAscending ? result : -result
+      })
+
+      return { items: sortedItems }
     },
     getKey: (item) => item.path,
     initialSortDescriptor: getSavedSortDescriptor(),
   })
 
-  const { openModal } = useModal()
-
-  const [uploading, setUploading] = useState(false)
-
-  const getShowHiddenFilesSetting = () => {
-    try {
-      const saved = localStorage.getItem('storage-show-hidden-files')
-
-      return saved === 'true'
-    } catch (_) {
-      return false
-    }
-  }
-
-  const [showHiddenFiles, setShowHiddenFiles] = useState(
-    getShowHiddenFilesSetting(),
-  )
-
-  const [page, setPage] = useState(1)
-  const rowsPerPage = 20
-
-  useEffect(() => {
-    const loadProviders = async () => {
-      try {
-        const providerList =
-          await StorageService.ProviderService.getProviderList()
-
-        setProviders(providerList)
-        if (providerList.length > 0) {
-          setStorageType(providerList[0].storage_type)
-        }
-      } catch (error) {
-        handleApiError(error, '加载存储提供者失败')
-      }
-    }
-
-    loadProviders()
-  }, [])
-
-  useEffect(() => {
-    if (storageType) {
-      fileList.reload()
-    }
-  }, [currentPath, storageType])
-
-  const isWinRootPath = (path: string) => {
-    return path.endsWith(':')
-  }
-
-  const getBreadcrumbs = () => {
+  const breadcrumbs = useMemo(() => {
     const parts = currentPath.split('/').filter(Boolean)
     const breadcrumbs = [{ title: '根目录', path: '' }]
-
     let fullPath = ''
 
     parts.forEach((part, index) => {
@@ -195,24 +260,23 @@ export default function StoragePage() {
       } else {
         fullPath += `/${part}`
       }
-
       breadcrumbs.push({ title: part, path: fullPath })
     })
 
     return breadcrumbs
-  }
+  }, [currentPath])
 
-  const reloadFiles = async () => {
+  const reloadFiles = useCallback(async () => {
     await fileList.reload()
-  }
+  }, [fileList])
 
-  const handleFileClick = (file: StorageFileInfo) => {
+  const handleFileClick = useCallback((file: StorageFileInfo) => {
     if (file.type === 'Directory') {
       setCurrentPath(file.path)
     }
-  }
+  }, [])
 
-  const handleTogglePathInput = () => {
+  const handleTogglePathInput = useCallback(() => {
     if (showPathInput) {
       if (pathInputValue.trim()) {
         setCurrentPath(pathInputValue.trim())
@@ -222,38 +286,40 @@ export default function StoragePage() {
       setPathInputValue(currentPath)
       setShowPathInput(true)
     }
-  }
+  }, [showPathInput, pathInputValue, currentPath])
 
-  const handleCreateFolder = async () => {
+  const handleCreateFolder = useCallback(async () => {
     const name = prompt('请输入文件夹名称:')
 
-    if (name && storageType) {
-      try {
+    if (!name || !storageType) return
+
+    await handleAsyncOperation(
+      async () => {
         const folderPath = currentPath.endsWith('/')
           ? currentPath + name
           : currentPath + '/' + name
 
         await StorageService.Mkdir(storageType, folderPath)
-        showSuccess('文件夹创建成功')
         await reloadFiles()
-      } catch (error) {
-        handleApiError(error, '文件夹创建失败')
-      }
-    }
-  }
+      },
+      'files',
+      '文件夹创建成功',
+    )
+  }, [storageType, currentPath, handleAsyncOperation, reloadFiles])
 
-  const handleUpload = () => {
+  const handleUpload = useCallback(() => {
     const input = document.createElement('input')
 
     input.type = 'file'
     input.multiple = true
+
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files
 
-      if (files && storageType) {
-        setUploading(true)
+      if (!files || !storageType) return
 
-        try {
+      await handleAsyncOperation(
+        async () => {
           for (let i = 0; i < files.length; i++) {
             const file = files[i]
             const targetPath = currentPath.endsWith('/')
@@ -262,46 +328,57 @@ export default function StoragePage() {
 
             await StorageService.Upload(storageType, targetPath, file)
           }
-
-          showSuccess(`成功上传 ${files.length} 个文件`)
           await reloadFiles()
-        } catch (error) {
-          handleApiError(error, '文件上传失败')
-        } finally {
-          setUploading(false)
-        }
-      }
+        },
+        'upload',
+        `成功上传 ${files.length} 个文件`,
+      )
     }
+
     input.click()
-  }
+  }, [storageType, currentPath, handleAsyncOperation, reloadFiles])
 
-  const handleRecognizeSelectedMedia = async (file: StorageFileInfo) => {
-    await openModal(() => <MediaRecognitionDialog defaultValue={file.name} />, {
-      title: '媒体识别',
-      size: window.innerWidth < 768 ? '3xl' : '4xl',
-    })
-  }
+  const handleRecognizeSelectedMedia = useCallback(
+    async (file: StorageFileInfo) => {
+      await openModal(
+        () => <MediaRecognitionDialog defaultValue={file.name} />,
+        {
+          title: '媒体识别',
+          size: window.innerWidth < 768 ? '3xl' : '4xl',
+        },
+      )
+    },
+    [openModal],
+  )
 
-  const handleDownload = async (file: StorageFileInfo) => {
-    try {
-      await StorageService.DownloadFile(storageType, file.path, file.name)
-      showSuccess('文件下载开始')
-    } catch (error) {
-      handleApiError(error, '文件下载失败')
-    }
-  }
+  const handleDownload = useCallback(
+    async (file: StorageFileInfo) => {
+      await handleAsyncOperation(
+        async () => {
+          await StorageService.DownloadFile(storageType, file.path, file.name)
+        },
+        'files',
+        '文件下载开始',
+      )
+    },
+    [storageType, handleAsyncOperation],
+  )
 
-  const handleDelete = async (file: StorageFileInfo) => {
-    if (confirm(`确定要删除 "${file.name}" 吗？`)) {
-      try {
-        await StorageService.Delete(storageType, file.path)
-        showSuccess('文件删除成功')
-        await reloadFiles()
-      } catch (error) {
-        handleApiError(error, '文件删除失败')
-      }
-    }
-  }
+  const handleDelete = useCallback(
+    async (file: StorageFileInfo) => {
+      if (!confirm(`确定要删除 "${file.name}" 吗？`)) return
+
+      await handleAsyncOperation(
+        async () => {
+          await StorageService.Delete(storageType, file.path)
+          await reloadFiles()
+        },
+        'delete',
+        '文件删除成功',
+      )
+    },
+    [storageType, handleAsyncOperation, reloadFiles],
+  )
 
   function CopyMoveForm({
     providers,
@@ -370,18 +447,20 @@ export default function StoragePage() {
     )
 
     if (!result) return
-    try {
-      await StorageService.Copy(
-        storageType,
-        file.path,
-        result.provider,
-        result.path,
-      )
-      showSuccess('文件复制成功')
-      await reloadFiles()
-    } catch (error) {
-      handleApiError(error, '文件复制失败')
-    }
+
+    await handleAsyncOperation(
+      async () => {
+        await StorageService.Copy(
+          storageType,
+          file.path,
+          result.provider,
+          result.path,
+        )
+        await reloadFiles()
+      },
+      'copy',
+      '文件复制成功',
+    )
   }
 
   const openMoveModal = async (file: StorageFileInfo) => {
@@ -401,46 +480,38 @@ export default function StoragePage() {
     )
 
     if (!result) return
-    try {
-      await StorageService.Move(
-        storageType,
-        file.path,
-        result.provider,
-        result.path,
-      )
-      showSuccess('文件移动成功')
-      await reloadFiles()
-    } catch (error) {
-      handleApiError(error, '文件移动失败')
-    }
+
+    await handleAsyncOperation(
+      async () => {
+        await StorageService.Move(
+          storageType,
+          file.path,
+          result.provider,
+          result.path,
+        )
+        await reloadFiles()
+      },
+      'move',
+      '文件移动成功',
+    )
   }
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-  }
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleString('zh-CN')
-  }
-
-  const getFileIcon = (file: StorageFileInfo) => {
+  const getFileIcon = useCallback((file: StorageFileInfo) => {
     if (file.type === 'Directory') {
       return <Folder className="w-5 h-5 text-amber-500" />
     }
 
     return <File className="w-5 h-5 text-gray-500" />
-  }
+  }, [])
 
-  const filteredItems = showHiddenFiles
-    ? fileList.items
-    : fileList.items.filter((file) => !file.name.startsWith('.'))
+  // 过滤和分页逻辑优化
+  const filteredItems = useMemo(() => {
+    return showHiddenFiles
+      ? fileList.items
+      : fileList.items.filter((file) => !file.name.startsWith('.'))
+  }, [showHiddenFiles, fileList.items])
 
-  const pages = Math.ceil(filteredItems.length / rowsPerPage)
+  const pages = Math.ceil(filteredItems.length / ROWS_PER_PAGE)
 
   // 当过滤条件改变导致总页数减少，且当前页码超出总页数时，自动调整页码
   useEffect(() => {
@@ -449,41 +520,14 @@ export default function StoragePage() {
     }
   }, [pages, page])
 
-  const items = filteredItems.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage,
-  )
+  const items = useMemo(() => {
+    return filteredItems.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE)
+  }, [filteredItems, page])
 
-  const columns = [
-    {
-      key: 'name',
-      label: '名称',
-    },
-    {
-      key: 'size',
-      label: '大小',
-      className: 'hidden sm:table-cell',
-    },
-    {
-      key: 'mod_time',
-      label: '修改时间',
-      className: 'hidden sm:table-cell',
-    },
-    {
-      key: 'actions',
-      className: 'sm:w-[200px]',
-      label: '操作',
-      width: 120,
-    },
-  ]
-
-  useEffect(() => {
-    setPage(1)
-  }, [fileList.items.length])
-
+  // 保存隐藏文件设置
   useEffect(() => {
     localStorage.setItem(
-      'storage-show-hidden-files',
+      STORAGE_KEYS.SHOW_HIDDEN_FILES,
       showHiddenFiles.toString(),
     )
   }, [showHiddenFiles])
@@ -537,7 +581,7 @@ export default function StoragePage() {
                   />
                 ) : (
                   <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide min-w-0 flex-1">
-                    {getBreadcrumbs().map((breadcrumb, index) => (
+                    {breadcrumbs.map((breadcrumb, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-1 flex-shrink-0"
@@ -585,13 +629,13 @@ export default function StoragePage() {
                 </Button>
                 <Button
                   color="success"
-                  isDisabled={!storageType || uploading}
+                  isDisabled={!storageType || loadingStates.upload}
                   size="sm"
                   startContent={<Upload className="w-4 h-4" />}
                   variant="solid"
                   onPress={handleUpload}
                 >
-                  {uploading ? '上传中...' : '上传文件'}
+                  {loadingStates.upload ? '上传中...' : '上传文件'}
                 </Button>
               </div>
 
@@ -626,7 +670,7 @@ export default function StoragePage() {
               sortDescriptor={fileList.sortDescriptor}
               onSortChange={fileList.sort}
             >
-              <TableHeader columns={columns}>
+              <TableHeader columns={TABLE_COLUMNS}>
                 {(column) => (
                   <TableColumn
                     key={column.key}
@@ -754,7 +798,7 @@ export default function StoragePage() {
           </div>
 
           {/* 分页组件 */}
-          {filteredItems.length > 0 && (
+          {filteredItems?.length > 0 && (
             <div className="flex justify-center py-3 sm:py-4">
               <Pagination
                 showControls
