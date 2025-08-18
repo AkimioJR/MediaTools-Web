@@ -1,7 +1,9 @@
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+
 // 日志配置接口
 export interface LogConfig {
-  console_level: string // 控制台日志级别
-  file_level: string // 文件日志级别
+  console_level: LogLevel // 控制台日志级别
+  file_level: LogLevel // 文件日志级别
   file_dir: string // 日志文件目录
 }
 
