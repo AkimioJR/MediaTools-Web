@@ -665,11 +665,6 @@ export default function StoragePage() {
                                   <span className="font-medium text-xs sm:text-sm truncate block">
                                     {file.name}
                                   </span>
-                                  <span className="text-xs text-foreground-500 sm:hidden">
-                                    {file.type === 'Directory'
-                                      ? '文件夹'
-                                      : formatFileSize(file.size ?? 0)}
-                                  </span>
                                 </div>
                               </div>
                             </TableCell>
@@ -677,9 +672,7 @@ export default function StoragePage() {
                         case 'size':
                           return (
                             <TableCell className="hidden sm:table-cell">
-                              {file.type === 'Directory'
-                                ? '-'
-                                : formatFileSize(file.size ?? 0)}
+                              {file.size ? formatFileSize(file.size) : '-'}
                             </TableCell>
                           )
                         case 'mod_time':

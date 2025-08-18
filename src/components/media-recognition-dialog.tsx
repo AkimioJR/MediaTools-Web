@@ -489,6 +489,7 @@ export function MediaRecognitionDialog({
             className="flex-1"
             isDisabled={isLoading}
             label="请输入媒体名称"
+            size="sm"
             value={mediaTitle}
             onKeyDown={handleKeyPress}
             onValueChange={setMediaTitle}
