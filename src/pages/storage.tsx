@@ -40,6 +40,8 @@ export default function StoragePage() {
   const [currentPath, setCurrentPath] = useState('')
   const [storageType, setStorageType] = useState('')
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
+  const [showPathInput, setShowPathInput] = useState(false)
+  const [pathInputValue, setPathInputValue] = useState('')
 
   const getSavedSortDescriptor = () => {
     try {
@@ -149,7 +151,6 @@ export default function StoragePage() {
   const [showHiddenFiles, setShowHiddenFiles] = useState(
     getShowHiddenFilesSetting(),
   )
-  const [inputPath, setInputPath] = useState('')
 
   const [page, setPage] = useState(1)
   const rowsPerPage = 20
@@ -211,10 +212,16 @@ export default function StoragePage() {
     }
   }
 
-  const handlePathNavigation = () => {
-    if (!storageType) return
-
-    setCurrentPath(inputPath)
+  const handleTogglePathInput = () => {
+    if (showPathInput) {
+      if (pathInputValue.trim()) {
+        setCurrentPath(pathInputValue.trim())
+      }
+      setShowPathInput(false)
+    } else {
+      setPathInputValue(currentPath)
+      setShowPathInput(true)
+    }
   }
 
   const handleCreateFolder = async () => {
@@ -460,12 +467,13 @@ export default function StoragePage() {
     {
       key: 'mod_time',
       label: '修改时间',
-      className: 'hidden md:table-cell',
+      className: 'hidden sm:table-cell',
     },
     {
       key: 'actions',
-      label: '操作',
       className: 'sm:w-[200px]',
+      label: '操作',
+      width: 120,
     },
   ]
 
@@ -487,7 +495,7 @@ export default function StoragePage() {
         <CardBody className="p-3 sm:p-4">
           <div className="flex flex-col gap-3 sm:gap-4">
             {/* 存储器选择和路径导航 */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
+            <div className="flex flex-col items-center sm:flex-row gap-3 sm:gap-4 flex-1">
               <Select
                 aria-label="存储器选择"
                 className="w-full sm:w-48"
@@ -510,48 +518,56 @@ export default function StoragePage() {
               </Select>
 
               {/* 路径导航 */}
-              <div className="flex items-center gap-2 p-2 bg-content2 rounded-lg flex-1 min-w-0">
+              <div className="flex items-center gap-2 p-2 bg-content2 rounded-lg flex-1 min-w-0 w-full">
                 <span className="text-xs sm:text-sm text-foreground-500 whitespace-nowrap flex-shrink-0">
                   当前路径:
                 </span>
-                <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide min-w-0 flex-1">
-                  {getBreadcrumbs().map((breadcrumb, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1 flex-shrink-0"
-                    >
-                      {index > 0 && (
-                        <span className="text-foreground-400 flex-shrink-0">
-                          /
-                        </span>
-                      )}
-                      <Button
-                        className="h-6 px-1 min-w-0 text-xs whitespace-nowrap flex-shrink-0"
-                        size="sm"
-                        variant="light"
-                        onPress={() => setCurrentPath(breadcrumb.path)}
+                {showPathInput ? (
+                  <Input
+                    className="text-xs"
+                    placeholder="请输入路径"
+                    size="sm"
+                    value={pathInputValue}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleTogglePathInput()
+                      }
+                    }}
+                    onValueChange={setPathInputValue}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide min-w-0 flex-1">
+                    {getBreadcrumbs().map((breadcrumb, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1 flex-shrink-0"
                       >
-                        {breadcrumb.title}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+                        {index > 0 && (
+                          <span className="text-foreground-400 flex-shrink-0">
+                            /
+                          </span>
+                        )}
+                        <Button
+                          className="h-6 px-1 min-w-0 text-xs whitespace-nowrap flex-shrink-0"
+                          size="sm"
+                          variant="light"
+                          onPress={() => setCurrentPath(breadcrumb.path)}
+                        >
+                          {breadcrumb.title}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  className="h-6 min-w-0 text-xs whitespace-nowrap"
+                  size="sm"
+                  variant="light"
+                  onPress={handleTogglePathInput}
+                >
+                  {showPathInput ? '跳转' : '跳转至指定路径'}
+                </Button>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Input
-                label="输入跳转路径回车进行跳转"
-                placeholder={`例如: ${currentPath}`}
-                size="sm"
-                value={inputPath}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handlePathNavigation()
-                  }
-                }}
-                onValueChange={setInputPath}
-              />
             </div>
 
             {/* 操作按钮 */}
@@ -620,6 +636,7 @@ export default function StoragePage() {
                       column.key === 'size'
                     }
                     className={column.className}
+                    width={column.width || null}
                   >
                     {column.label}
                   </TableColumn>
@@ -634,7 +651,7 @@ export default function StoragePage() {
                 {(file) => (
                   <TableRow
                     key={file.path}
-                    className="cursor-pointer hover:bg-content2"
+                    className="group cursor-pointer hover:bg-content2"
                     onClick={() => handleFileClick(file)}
                   >
                     {(columnKey) => {
@@ -659,7 +676,7 @@ export default function StoragePage() {
                           )
                         case 'size':
                           return (
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               {file.type === 'Directory'
                                 ? '-'
                                 : formatFileSize(file.size ?? 0)}
@@ -667,7 +684,7 @@ export default function StoragePage() {
                           )
                         case 'mod_time':
                           return (
-                            <TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               <span className="text-xs sm:text-sm text-foreground-500">
                                 {formatDate(file.mod_time ?? '')}
                               </span>
@@ -676,7 +693,7 @@ export default function StoragePage() {
                         case 'actions':
                           return (
                             <TableCell>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 ease">
                                 <Button
                                   isIconOnly
                                   aria-label="识别媒体"
