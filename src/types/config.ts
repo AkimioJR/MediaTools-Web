@@ -46,6 +46,8 @@ export interface LibraryConfig {
   transfer_type: string // 传输类型
   organize_by_type: boolean // 是否按类型分文件夹
   organize_by_category: boolean // 是否按分类分文件夹
+  scrape: boolean // 是否刮削
+  notify: boolean // 是否通知
 }
 
 // 媒体配置接口
