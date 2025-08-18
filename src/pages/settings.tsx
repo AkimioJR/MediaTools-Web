@@ -118,10 +118,12 @@ function LogSettings() {
         <Select
           label="终端日志级别"
           placeholder="选择日志级别"
-          selectedKeys={logConfig.level ? [logConfig.level] : []}
+          selectedKeys={
+            logConfig.console_level ? [logConfig.console_level] : []
+          }
           variant="bordered"
           onSelectionChange={(keys) =>
-            updateConfig({ level: Array.from(keys)[0] as string })
+            updateConfig({ console_level: Array.from(keys)[0] as string })
           }
         >
           {logLevels.map((level) => (
@@ -147,8 +149,8 @@ function LogSettings() {
       <Input
         label="日志文件目录"
         placeholder="输入日志文件目录路径"
-        value={logConfig.path || ''}
-        onValueChange={(value) => updateConfig({ path: value })}
+        value={logConfig.file_dir || ''}
+        onValueChange={(value) => updateConfig({ file_dir: value })}
       />
 
       <div className="flex justify-end">
