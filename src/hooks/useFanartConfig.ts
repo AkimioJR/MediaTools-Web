@@ -9,6 +9,16 @@ export const useFanartConfig = () => {
   const [fanartConfig, setFanartConfig] = useState<FanartConfig | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // 语言选项
+  const fanartLanguageOptions = [
+    { label: '中文(zh)', value: 'zh' },
+    { label: '英文(en)', value: 'en' },
+    { label: '德语(de)', value: 'de' },
+    { label: '法语(fr)', value: 'fr' },
+    { label: '日文(ja)', value: 'ja' },
+    { label: '韩文(ko)', value: 'ko' },
+  ]
+
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
@@ -46,6 +56,7 @@ export const useFanartConfig = () => {
 
   return {
     fanartConfig,
+    fanartLanguageOptions,
     loading,
     loadData,
     updateData,

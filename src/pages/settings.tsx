@@ -1,7 +1,7 @@
 import type { StorageProviderInterface, TransferType } from '@/types/storage'
 
 import { Card, CardBody, CardHeader } from '@heroui/card'
-import { Input } from '@heroui/input'
+import { Input, Textarea } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
 import { Button } from '@heroui/button'
 import { Tabs, Tab } from '@heroui/tabs'
@@ -11,6 +11,7 @@ import { Checkbox } from '@heroui/checkbox'
 import { FileText, Image, Video, Info } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
+import { LogLevel } from '@/types'
 import {
   useLogConfig,
   useTMDBConfig,
@@ -121,9 +122,10 @@ function LogSettings() {
           selectedKeys={
             logConfig.console_level ? [logConfig.console_level] : []
           }
-          variant="bordered"
           onSelectionChange={(keys) =>
-            updateConfig({ console_level: Array.from(keys)[0] as string })
+            updateConfig({
+              console_level: Array.from(keys)[0] as LogLevel,
+            })
           }
         >
           {logLevels.map((level) => (
@@ -135,9 +137,10 @@ function LogSettings() {
           label="文件日志级别"
           placeholder="选择日志级别"
           selectedKeys={logConfig.file_level ? [logConfig.file_level] : []}
-          variant="bordered"
           onSelectionChange={(keys) =>
-            updateConfig({ file_level: Array.from(keys)[0] as string })
+            updateConfig({
+              file_level: Array.from(keys)[0] as LogLevel,
+            })
           }
         >
           {logLevels.map((level) => (
@@ -170,6 +173,8 @@ function ScrapeSettings() {
     loadData: loadTmdbData,
     updateData: updateTmdbData,
     updateConfig: updateTmdbConfig,
+    tmdbLanguageOptions,
+    imageLanguageOptions,
   } = useTMDBConfig()
   const {
     fanartConfig,
@@ -177,16 +182,13 @@ function ScrapeSettings() {
     loadData: loadFanartData,
     updateData: updateFanartData,
     updateConfig: updateFanartConfig,
+    fanartLanguageOptions,
   } = useFanartConfig()
 
   useEffect(() => {
     loadTmdbData()
     loadFanartData()
   }, [loadTmdbData, loadFanartData])
-
-  const handleSave = async () => {
-    await Promise.all([updateTmdbData(), updateFanartData()])
-  }
 
   const loading = tmdbLoading || fanartLoading
 
@@ -229,20 +231,58 @@ function ScrapeSettings() {
             onValueChange={(value) => updateTmdbConfig({ image_url: value })}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
+            <Select
               label="语言设置"
-              placeholder="例如: zh-CN"
-              value={tmdbConfig?.language || ''}
-              onValueChange={(value) => updateTmdbConfig({ language: value })}
-            />
-            <Input
-              label="图片语言"
-              placeholder="例如: zh,en,null"
-              value={tmdbConfig?.include_image_language || ''}
-              onValueChange={(value) =>
-                updateTmdbConfig({ include_image_language: value })
+              placeholder="选择语言"
+              selectedKeys={tmdbConfig?.language ? [tmdbConfig.language] : []}
+              onSelectionChange={(keys) =>
+                updateTmdbConfig({ language: Array.from(keys)[0] as string })
               }
-            />
+            >
+              {tmdbLanguageOptions.map((opt) => (
+                <SelectItem key={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </Select>
+
+            <Select
+              label="图片语言（可多选）"
+              placeholder="选择图片语言"
+              selectedKeys={
+                tmdbConfig?.include_image_language
+                  ? tmdbConfig.include_image_language
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                  : []
+              }
+              selectionMode="multiple"
+              onSelectionChange={(keys) => {
+                if (keys === 'all') {
+                  updateTmdbConfig({
+                    include_image_language: imageLanguageOptions
+                      .map((o) => o.value)
+                      .join(','),
+                  })
+                } else {
+                  updateTmdbConfig({
+                    include_image_language: Array.from(keys).join(','),
+                  })
+                }
+              }}
+            >
+              {imageLanguageOptions.map((opt) => (
+                <SelectItem key={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </Select>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              color="primary"
+              isLoading={tmdbLoading}
+              onPress={updateTmdbData}
+            >
+              {tmdbLoading ? '保存中...' : '保存 TMDB 配置'}
+            </Button>
           </div>
         </CardBody>
       </Card>
@@ -269,14 +309,36 @@ function ScrapeSettings() {
             value={fanartConfig?.api_url || ''}
             onValueChange={(value) => updateFanartConfig({ api_url: value })}
           />
+          <Select
+            label="语言（可多选）"
+            placeholder="选择语言"
+            selectedKeys={fanartConfig?.languages || []}
+            selectionMode="multiple"
+            onSelectionChange={(keys) => {
+              if (keys === 'all') {
+                updateFanartConfig({
+                  languages: fanartLanguageOptions.map((o) => o.value),
+                })
+              } else {
+                updateFanartConfig({ languages: Array.from(keys).map(String) })
+              }
+            }}
+          >
+            {fanartLanguageOptions.map((opt) => (
+              <SelectItem key={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </Select>
+          <div className="flex justify-end">
+            <Button
+              color="primary"
+              isLoading={fanartLoading}
+              onPress={updateFanartData}
+            >
+              {fanartLoading ? '保存中...' : '保存 Fanart 配置'}
+            </Button>
+          </div>
         </CardBody>
       </Card>
-
-      <div className="flex justify-end">
-        <Button color="primary" isLoading={loading} onPress={handleSave}>
-          {loading ? '保存中...' : '保存配置'}
-        </Button>
-      </div>
     </div>
   )
 }
@@ -364,6 +426,8 @@ function MediaSettings() {
         transfer_type: (available[0]?.value || 'Copy') as TransferType,
         organize_by_type: false,
         organize_by_category: false,
+        scrape: false,
+        notify: false,
       },
     ])
   }
@@ -393,12 +457,30 @@ function MediaSettings() {
     loadProviders()
   }, [])
 
-  const handleSave = async () => {
-    await Promise.all([
-      updateFormatData(),
-      updateCustomWordData(),
-      updateLibrariesData(),
-    ])
+  const parseLines = (value: string) =>
+    value.split(/\r?\n/).map((w) => w.trim())
+
+  const ensureFormat = (prev: any) =>
+    prev ? { ...prev } : { movie: '', tv: '' }
+
+  const ensureCustomWord = (prev: any) =>
+    prev
+      ? { ...prev }
+      : { identify_word: [], customization: [], exclude_words: [] }
+
+  const toMultilineValue = (list?: string[]) =>
+    list && list.length > 0 ? list.join('\n') : ''
+
+  const updateCustomWordField = (
+    field: 'identify_word' | 'customization' | 'exclude_words',
+    value: string,
+  ) => {
+    const words = parseLines(value)
+
+    setCustomWordConfig((prev) => ({
+      ...ensureCustomWord(prev),
+      [field]: words,
+    }))
   }
 
   if (loading && !formatConfig && !customWordConfig) {
@@ -423,24 +505,26 @@ function MediaSettings() {
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
+            <Textarea
               label="电影格式"
               placeholder="例如: {title} ({year})"
               value={formatConfig?.movie || ''}
               onValueChange={(value) =>
-                setFormatConfig((prev) =>
-                  prev ? { ...prev, movie: value } : { movie: value, tv: '' },
-                )
+                setFormatConfig((prev) => ({
+                  ...ensureFormat(prev),
+                  movie: value,
+                }))
               }
             />
-            <Input
+            <Textarea
               label="电视剧格式"
               placeholder="例如: {title} S{season:02d}E{episode:02d}"
               value={formatConfig?.tv || ''}
               onValueChange={(value) =>
-                setFormatConfig((prev) =>
-                  prev ? { ...prev, tv: value } : { movie: '', tv: value },
-                )
+                setFormatConfig((prev) => ({
+                  ...ensureFormat(prev),
+                  tv: value,
+                }))
               }
             />
           </div>
@@ -448,6 +532,15 @@ function MediaSettings() {
             支持变量: {'{title}'}, {'{year}'}, {'{season}'}, {'{episode}'},{' '}
             {'{quality}'}
           </p>
+          <div className="flex justify-end">
+            <Button
+              color="primary"
+              isLoading={loading}
+              onPress={updateFormatData}
+            >
+              {loading ? '保存中...' : '保存重命名格式'}
+            </Button>
+          </div>
         </CardBody>
       </Card>
 
@@ -462,84 +555,64 @@ function MediaSettings() {
           </div>
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
-          <div className="flex items-center gap-2">
-            <Input
+          <div className="flex items-start gap-2">
+            <Textarea
               className="flex-1"
-              label="自定义识别词"
-              placeholder="输入自定义识别词，用逗号分隔"
-              value={customWordConfig?.identify_word?.join(', ') || ''}
-              onValueChange={(value) => {
-                const words = value
-                  .split(',')
-                  .map((w) => w.trim())
-                  .filter(Boolean)
-
-                setCustomWordConfig((prev) =>
-                  prev
-                    ? { ...prev, identify_word: words }
-                    : {
-                        identify_word: words,
-                        customization: [],
-                        exclude_words: [],
-                      },
-                )
-              }}
-            />
-            <Tooltip
-              content={
-                <div className="text-xs space-y-1 max-w-xs">
-                  {identifyWordHints.map((line, i) => (
-                    <p key={i}>{line}</p>
-                  ))}
+              label={
+                <div className="flex items-center gap-2">
+                  <p>自定义识别词</p>
+                  <Tooltip
+                    content={
+                      <div className="text-xs space-y-1 max-w-xs">
+                        {identifyWordHints.map((line, i) => (
+                          <p key={i}>{line}</p>
+                        ))}
+                      </div>
+                    }
+                    placement="right"
+                  >
+                    <Info className="w-4 h-4 text-foreground-500" />
+                  </Tooltip>
                 </div>
               }
-              placement="right"
-            >
-              <Info className="w-4 h-4 text-foreground-500" />
-            </Tooltip>
+              maxRows={12}
+              minRows={8}
+              placeholder="输入自定义识别词，用逗号分隔"
+              value={toMultilineValue(customWordConfig?.identify_word)}
+              onValueChange={(value) =>
+                updateCustomWordField('identify_word', value)
+              }
+            />
           </div>
-          <Input
-            label="自定义占位词"
+          <Textarea
+            description="用于电影/电视剧重命名的自定义词（每行一个，支持使用正则表达式，注意转义）"
+            label="自定义词条"
+            maxRows={12}
+            minRows={8}
             placeholder="输入自定义占位词，用逗号分隔"
-            value={customWordConfig?.customization?.join(', ') || ''}
-            onValueChange={(value) => {
-              const words = value
-                .split(',')
-                .map((w) => w.trim())
-                .filter(Boolean)
-
-              setCustomWordConfig((prev) =>
-                prev
-                  ? { ...prev, customization: words }
-                  : {
-                      identify_word: [],
-                      customization: words,
-                      exclude_words: [],
-                    },
-              )
-            }}
+            value={toMultilineValue(customWordConfig?.customization)}
+            onValueChange={(value) =>
+              updateCustomWordField('customization', value)
+            }
           />
-          <Input
-            label="自定义排除词"
+          <Textarea
+            description="路径中包含这些词的将不会自动转移（每行一个）"
+            label="媒体库过滤词"
             placeholder="输入自定义排除词，用逗号分隔"
-            value={customWordConfig?.exclude_words?.join(', ') || ''}
-            onValueChange={(value) => {
-              const words = value
-                .split(',')
-                .map((w) => w.trim())
-                .filter(Boolean)
-
-              setCustomWordConfig((prev) =>
-                prev
-                  ? { ...prev, exclude_words: words }
-                  : {
-                      identify_word: [],
-                      customization: [],
-                      exclude_words: words,
-                    },
-              )
-            }}
+            value={toMultilineValue(customWordConfig?.exclude_words)}
+            onValueChange={(value) =>
+              updateCustomWordField('exclude_words', value)
+            }
           />
+          <div className="flex justify-end">
+            <Button
+              color="primary"
+              isLoading={loading}
+              onPress={updateCustomWordData}
+            >
+              {loading ? '保存中...' : '保存自定义词条配置'}
+            </Button>
+          </div>
         </CardBody>
       </Card>
 
@@ -731,14 +804,17 @@ function MediaSettings() {
               ))}
             </div>
           )}
+          <div className="flex justify-end">
+            <Button
+              color="primary"
+              isLoading={loading}
+              onPress={updateLibrariesData}
+            >
+              {loading ? '保存中...' : '保存媒体库配置'}
+            </Button>
+          </div>
         </CardBody>
       </Card>
-
-      <div className="flex justify-end">
-        <Button color="primary" isLoading={loading} onPress={handleSave}>
-          {loading ? '保存中...' : '保存配置'}
-        </Button>
-      </div>
     </div>
   )
 }

@@ -9,6 +9,25 @@ export const useTMDBConfig = () => {
   const [tmdbConfig, setTmdbConfig] = useState<TMDBConfig | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // 语言选项
+  const tmdbLanguageOptions = [
+    { label: '简体中文', value: 'zh-CN' },
+    { label: '繁体中文 (香港)', value: 'zh-HK' },
+    { label: '繁体中文 (台湾)', value: 'zh-TW' },
+    { label: '英语 (美国)', value: 'en-US' },
+    { label: '日语', value: 'ja-JP' },
+    { label: '韩语', value: 'ko-KR' },
+  ]
+
+  // 图片语言选项
+  const imageLanguageOptions = [
+    { label: '中文(zh)', value: 'zh' },
+    { label: '英文(en)', value: 'en' },
+    { label: '日文(ja)', value: 'ja' },
+    { label: '韩文(ko)', value: 'ko' },
+    { label: '无语言(null)', value: 'null' },
+  ]
+
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
@@ -46,6 +65,8 @@ export const useTMDBConfig = () => {
 
   return {
     tmdbConfig,
+    tmdbLanguageOptions,
+    imageLanguageOptions,
     loading,
     loadData,
     updateData,
