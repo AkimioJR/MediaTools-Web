@@ -129,12 +129,6 @@ export default function StoragePage() {
     loadProviders()
   }, [handleAsyncOperation])
 
-  useEffect(() => {
-    if (storageType) {
-      fileList.reload()
-    }
-  }, [currentPath, storageType])
-
   const fileList = useAsyncList<StorageFileInfo>({
     async load({}) {
       if (!storageType) {
@@ -142,7 +136,11 @@ export default function StoragePage() {
       }
 
       try {
-        const files = await StorageService.List(storageType, currentPath, true)
+        const files = await StorageService.List(
+          storageType,
+          currentPath,
+          sortMode === 'mod_time',
+        )
 
         const processedFiles = files.map((file) => ({
           ...file,
@@ -213,6 +211,19 @@ export default function StoragePage() {
     getKey: (item) => item.path,
     initialSortDescriptor: getSavedSortDescriptor(),
   })
+
+  useEffect(() => {
+    if (storageType) {
+      fileList.reload()
+    }
+  }, [currentPath, storageType, sortMode])
+
+  // 有数据后再排序
+  useEffect(() => {
+    if (!fileList.isLoading && fileList.items.length > 0) {
+      fileList.sort({ column: sortMode, direction: 'ascending' })
+    }
+  }, [sortMode, fileList.isLoading])
 
   const breadcrumbs = useMemo(() => {
     const parts = currentPath.split('/').filter(Boolean)
@@ -485,18 +496,10 @@ export default function StoragePage() {
                 th: 'bg-default-100 text-xs sm:text-sm',
                 td: 'py-2 sm:py-3 text-xs sm:text-sm',
               }}
-              sortDescriptor={fileList.sortDescriptor}
-              onSortChange={fileList.sort}
             >
               <TableHeader columns={TABLE_COLUMNS}>
                 {(column) => (
-                  <TableColumn
-                    key={column.key}
-                    allowsSorting={['name', 'mod_time', 'size'].includes(
-                      column.key,
-                    )}
-                    className={column.className}
-                  >
+                  <TableColumn key={column.key} className={column.className}>
                     {column.label}
                   </TableColumn>
                 )}
