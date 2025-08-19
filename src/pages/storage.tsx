@@ -8,35 +8,17 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  getKeyValue,
 } from '@heroui/table'
-import { Button } from '@heroui/button'
 import { Spinner } from '@heroui/spinner'
-import { Input } from '@heroui/input'
-import { Select, SelectItem } from '@heroui/select'
-import { Switch } from '@heroui/switch'
-import {
-  File,
-  Folder,
-  Upload,
-  Download,
-  Trash2,
-  Database,
-  Copy,
-  Move,
-  FolderPlus,
-  ScanSearch,
-  ArrowDownAZ,
-  ClockArrowDown,
-} from 'lucide-react'
+import { File, Folder } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAsyncList } from '@react-stately/data'
 
-import { HeaderIcon } from '@/components/icon'
 import { StorageService } from '@/services/storage'
 import { showSuccess, handleApiError } from '@/utils/message'
 import { useModal } from '@/components/modal-provider'
 import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
+import { Toolbar, CopyMoveForm, FileActions } from '@/ui/storage'
 
 interface FileColumn {
   key: string
@@ -53,7 +35,6 @@ interface LoadingStates {
   move: boolean
 }
 
-const ROWS_PER_PAGE = 20
 const STORAGE_KEYS = {
   SORT_DESCRIPTOR: 'storage-table-sort',
   SHOW_HIDDEN_FILES: 'storage-show-hidden-files',
@@ -88,19 +69,6 @@ const getShowHiddenFilesSetting = () => {
   }
 }
 
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-}
-
-const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleString('zh-CN')
-}
-
 const isWinRootPath = (path: string) => path.endsWith(':')
 
 export default function StoragePage() {
@@ -110,7 +78,6 @@ export default function StoragePage() {
 
   const [showPathInput, setShowPathInput] = useState(false)
   const [pathInputValue, setPathInputValue] = useState('')
-  const [page, setPage] = useState(1)
   const [showHiddenFiles, setShowHiddenFiles] = useState(
     getShowHiddenFilesSetting,
   )
@@ -268,6 +235,14 @@ export default function StoragePage() {
     await fileList.reload()
   }, [fileList])
 
+  const getFileIcon = useCallback((file: StorageFileInfo) => {
+    if (file.type === 'Directory') {
+      return <Folder className="w-5 h-5 text-amber-500" />
+    }
+
+    return <File className="w-5 h-5 text-gray-500" />
+  }, [])
+
   const handleFileClick = useCallback((file: StorageFileInfo) => {
     if (file.type === 'Directory') {
       setCurrentPath(file.path)
@@ -378,56 +353,6 @@ export default function StoragePage() {
     [storageType, handleAsyncOperation, reloadFiles],
   )
 
-  function CopyMoveForm({
-    providers,
-    defaultProvider,
-    defaultPath,
-    onSubmit,
-    onCancel,
-  }: {
-    providers: StorageProviderInterface[]
-    defaultProvider: string
-    defaultPath: string
-    onSubmit: (provider: string, path: string) => void
-    onCancel: () => void
-  }) {
-    const [provider, setProvider] = useState(defaultProvider)
-    const [path, setPath] = useState(defaultPath)
-
-    return (
-      <div className="space-y-4">
-        <Select
-          aria-label="目标存储器"
-          label="目标存储器"
-          selectedKeys={provider ? [provider] : []}
-          variant="bordered"
-          onSelectionChange={(keys) =>
-            setProvider(Array.from(keys)[0] as string)
-          }
-        >
-          {providers.map((p) => (
-            <SelectItem key={p.storage_type}>{p.storage_type}</SelectItem>
-          ))}
-        </Select>
-        <Input
-          label="目标路径"
-          placeholder="请输入目标路径"
-          value={path}
-          variant="bordered"
-          onValueChange={setPath}
-        />
-        <div className="flex justify-end gap-2">
-          <Button variant="light" onPress={onCancel}>
-            取消
-          </Button>
-          <Button color="primary" onPress={() => onSubmit(provider, path)}>
-            确认
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   const openCopyModal = async (file: StorageFileInfo) => {
     const result = await openModal<
       { provider: string; path: string } | undefined
@@ -494,35 +419,12 @@ export default function StoragePage() {
     )
   }
 
-  const getFileIcon = useCallback((file: StorageFileInfo) => {
-    if (file.type === 'Directory') {
-      return <Folder className="w-5 h-5 text-amber-500" />
-    }
-
-    return <File className="w-5 h-5 text-gray-500" />
-  }, [])
-
-  // 过滤和分页逻辑优化
   const filteredItems = useMemo(() => {
     return showHiddenFiles
       ? fileList.items
       : fileList.items.filter((file) => !file.name.startsWith('.'))
   }, [showHiddenFiles, fileList.items])
 
-  const pages = Math.ceil(filteredItems.length / ROWS_PER_PAGE)
-
-  // 当过滤条件改变导致总页数减少，且当前页码超出总页数时，自动调整页码
-  useEffect(() => {
-    if (page > pages && pages > 0) {
-      setPage(pages)
-    }
-  }, [pages, page])
-
-  const items = useMemo(() => {
-    return filteredItems.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE)
-  }, [filteredItems, page])
-
-  // 保存隐藏文件设置
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEYS.SHOW_HIDDEN_FILES,
@@ -546,132 +448,27 @@ export default function StoragePage() {
       {/* 操作工具栏 */}
       <Card radius="lg" shadow="sm">
         <CardBody className="p-3 sm:p-4">
-          <div className="flex flex-col gap-3 sm:gap-4">
-            {/* 存储器选择和路径导航 */}
-            <div className="flex flex-col items-center sm:flex-row gap-3 sm:gap-4 flex-1">
-              <Select
-                aria-label="存储器选择"
-                className="w-full sm:w-48"
-                placeholder="请选择存储器"
-                selectedKeys={storageType ? [storageType] : []}
-                size="md"
-                startContent={<Database className="w-4 h-4" />}
-                onSelectionChange={(keys) => {
-                  const key = Array.from(keys)[0] as string
-
-                  setStorageType(key)
-                  setCurrentPath('')
-                }}
-              >
-                {providers.map((provider) => (
-                  <SelectItem key={provider.storage_type}>
-                    {provider.storage_type}
-                  </SelectItem>
-                ))}
-              </Select>
-
-              {/* 路径导航 */}
-              <div className="flex items-center gap-2 p-2 bg-content2 rounded-lg flex-1 min-w-0 w-full">
-                <span className="text-xs sm:text-sm text-foreground-500 whitespace-nowrap flex-shrink-0">
-                  当前路径:
-                </span>
-                {showPathInput ? (
-                  <Input
-                    className="text-xs"
-                    placeholder="请输入路径"
-                    size="sm"
-                    value={pathInputValue}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleTogglePathInput()
-                      }
-                    }}
-                    onValueChange={setPathInputValue}
-                  />
-                ) : (
-                  <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide min-w-0 flex-1">
-                    {breadcrumbs.map((breadcrumb, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 flex-shrink-0"
-                      >
-                        {index > 0 && (
-                          <span className="text-foreground-400 flex-shrink-0">
-                            /
-                          </span>
-                        )}
-                        <Button
-                          className="h-6 px-1 min-w-0 text-xs whitespace-nowrap flex-shrink-0"
-                          size="sm"
-                          variant="light"
-                          onPress={() => setCurrentPath(breadcrumb.path)}
-                        >
-                          {breadcrumb.title}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <Button
-                  className="h-6 min-w-0 text-xs whitespace-nowrap"
-                  size="sm"
-                  variant="light"
-                  onPress={handleTogglePathInput}
-                >
-                  {showPathInput ? '跳转' : '跳转至指定路径'}
-                </Button>
-              </div>
-            </div>
-
-            {/* 操作按钮 */}
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Button
-                  color="primary"
-                  isDisabled={!storageType}
-                  size="sm"
-                  startContent={<FolderPlus className="w-4 h-4" />}
-                  variant="solid"
-                  onPress={handleCreateFolder}
-                >
-                  新建文件夹
-                </Button>
-                <Button
-                  color="success"
-                  isDisabled={!storageType || loadingStates.upload}
-                  size="sm"
-                  startContent={<Upload className="w-4 h-4" />}
-                  variant="solid"
-                  onPress={handleUpload}
-                >
-                  {loadingStates.upload ? '上传中...' : '上传文件'}
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  isIconOnly
-                  aria-label="切换排序"
-                  size="sm"
-                  variant="light"
-                  onPress={handleSwitchSort}
-                >
-                  <HeaderIcon
-                    icon={sortMode === 'name' ? ArrowDownAZ : ClockArrowDown}
-                  />
-                </Button>
-                <span className="text-xs sm:text-sm text-foreground-500">
-                  显示隐藏文件
-                </span>
-                <Switch
-                  aria-label="显示隐藏文件"
-                  isSelected={showHiddenFiles}
-                  size="sm"
-                  onValueChange={setShowHiddenFiles}
-                />
-              </div>
-            </div>
-          </div>
+          <Toolbar
+            breadcrumbs={breadcrumbs}
+            loadingUpload={loadingStates.upload}
+            pathInputValue={pathInputValue}
+            providers={providers}
+            showHiddenFiles={showHiddenFiles}
+            showPathInput={showPathInput}
+            sortMode={sortMode}
+            storageType={storageType}
+            onBreadcrumbClick={setCurrentPath}
+            onCreateFolder={handleCreateFolder}
+            onPathInputChange={setPathInputValue}
+            onProviderChange={(key) => {
+              setStorageType(key)
+              setCurrentPath('')
+            }}
+            onToggleHidden={setShowHiddenFiles}
+            onTogglePathInput={handleTogglePathInput}
+            onToggleSort={handleSwitchSort}
+            onUpload={handleUpload}
+          />
         </CardBody>
       </Card>
 
@@ -695,11 +492,9 @@ export default function StoragePage() {
                 {(column) => (
                   <TableColumn
                     key={column.key}
-                    allowsSorting={
-                      column.key === 'name' ||
-                      column.key === 'mod_time' ||
-                      column.key === 'size'
-                    }
+                    allowsSorting={['name', 'mod_time', 'size'].includes(
+                      column.key,
+                    )}
                     className={column.className}
                   >
                     {column.label}
@@ -709,7 +504,7 @@ export default function StoragePage() {
               <TableBody
                 emptyContent="此目录为空"
                 isLoading={fileList.isLoading}
-                items={items}
+                items={filteredItems}
                 loadingContent={<Spinner label="加载中..." />}
               >
                 {(file) => (
@@ -736,77 +531,40 @@ export default function StoragePage() {
                         case 'size':
                           return (
                             <TableCell className="hidden sm:table-cell">
-                              {file.size ? formatFileSize(file.size) : '-'}
+                              {file.size
+                                ? `${(file.size / 1024 / 1024).toFixed(1)} MB`
+                                : '-'}
                             </TableCell>
                           )
                         case 'mod_time':
                           return (
                             <TableCell className="hidden sm:table-cell">
                               <span className="text-xs sm:text-sm text-foreground-500">
-                                {formatDate(file.mod_time ?? '')}
+                                {file.mod_time
+                                  ? new Date(file.mod_time).toLocaleString(
+                                      'zh-CN',
+                                    )
+                                  : ''}
                               </span>
                             </TableCell>
                           )
                         case 'actions':
                           return (
                             <TableCell width="20%">
-                              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 ease ">
-                                <Button
-                                  isIconOnly
-                                  aria-label="识别媒体"
-                                  size="sm"
-                                  variant="light"
-                                  onPress={() =>
-                                    handleRecognizeSelectedMedia(file)
-                                  }
-                                >
-                                  <ScanSearch className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </Button>
-                                {file.type !== 'Directory' && (
-                                  <Button
-                                    isIconOnly
-                                    aria-label="下载"
-                                    size="sm"
-                                    variant="light"
-                                    onPress={() => handleDownload(file)}
-                                  >
-                                    <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  </Button>
-                                )}
-                                <Button
-                                  isIconOnly
-                                  aria-label="复制"
-                                  size="sm"
-                                  variant="light"
-                                  onPress={() => openCopyModal(file)}
-                                >
-                                  <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </Button>
-                                <Button
-                                  isIconOnly
-                                  aria-label="移动"
-                                  size="sm"
-                                  variant="light"
-                                  onPress={() => openMoveModal(file)}
-                                >
-                                  <Move className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </Button>
-                                <Button
-                                  isIconOnly
-                                  aria-label="删除"
-                                  size="sm"
-                                  variant="light"
-                                  onPress={() => handleDelete(file)}
-                                >
-                                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-danger" />
-                                </Button>
-                              </div>
+                              <FileActions
+                                file={file}
+                                onCopy={openCopyModal}
+                                onDelete={handleDelete}
+                                onDownload={handleDownload}
+                                onMove={openMoveModal}
+                                onRecognize={handleRecognizeSelectedMedia}
+                              />
                             </TableCell>
                           )
                         default:
                           return (
                             <TableCell>
-                              {getKeyValue(file, columnKey as string)}
+                              {(file as any)[String(columnKey)]}
                             </TableCell>
                           )
                       }
