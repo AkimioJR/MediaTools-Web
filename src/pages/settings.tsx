@@ -1,4 +1,5 @@
 import type { StorageProviderInterface, TransferType } from '@/types/storage'
+import type { DragEndEvent } from '@dnd-kit/core'
 
 import { Card, CardBody, CardHeader } from '@heroui/card'
 import { Input, Textarea } from '@heroui/input'
@@ -8,8 +9,23 @@ import { Tabs, Tab } from '@heroui/tabs'
 import { Spinner } from '@heroui/spinner'
 import { Tooltip } from '@heroui/tooltip'
 import { Checkbox } from '@heroui/checkbox'
-import { FileText, Image, Video, Info } from 'lucide-react'
+import { FileText, Image, Video, Info, GripVertical } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers'
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 import { LogLevel } from '@/types'
 import {
@@ -361,6 +377,51 @@ function MediaSettings() {
     updateLibrariesData,
   } = useMediaConfig()
 
+  // dnd-kit
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  )
+
+  function SortableLibraryItem({
+    id,
+    children,
+  }: {
+    id: string
+    children: React.ReactNode
+  }) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+      useSortable({ id })
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    }
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        {children}
+      </div>
+    )
+  }
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return
+    const oldIndex = libraries.findIndex(
+      (_, i) => String(i) === String(active.id),
+    )
+    const newIndex = libraries.findIndex(
+      (_, i) => String(i) === String(over.id),
+    )
+
+    if (oldIndex === -1 || newIndex === -1) return
+    setLibraries((prev) => arrayMove(prev, oldIndex, newIndex))
+  }
+
   // 自定义识别词提示内容
   const identifyWordHints: string[] = [
     '屏蔽词',
@@ -635,209 +696,241 @@ function MediaSettings() {
               暂无媒体库配置
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {libraries.map((lib, idx) => (
-                <Card key={idx} radius="lg" shadow="sm">
-                  <CardBody className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">
-                        {lib.name || '未命名媒体库'}
-                      </span>
-                      <Button
-                        color="danger"
-                        size="sm"
-                        variant="light"
-                        onPress={() => removeLibrary(idx)}
-                      >
-                        删除
-                      </Button>
-                    </div>
-                    <Input
-                      label="名称"
-                      value={lib.name}
-                      onValueChange={(v) =>
-                        setLibraries((prev) => {
-                          const next = [...prev]
+            <DndContext
+              collisionDetection={closestCenter}
+              modifiers={[restrictToFirstScrollableAncestor]}
+              sensors={sensors}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={libraries.map((_, i) => String(i))}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {libraries.map((lib, idx) => (
+                    <SortableLibraryItem key={String(idx)} id={String(idx)}>
+                      <Card radius="lg" shadow="sm">
+                        <CardBody className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <GripVertical className="w-4 h-4 text-foreground-500" />
+                              <span className="text-sm font-medium">
+                                {lib.name || '未命名媒体库'}
+                              </span>
+                            </div>
+                            <Button
+                              color="danger"
+                              size="sm"
+                              variant="light"
+                              onPress={() => removeLibrary(idx)}
+                            >
+                              删除
+                            </Button>
+                          </div>
+                          <Input
+                            label="名称"
+                            value={lib.name}
+                            onValueChange={(v) =>
+                              setLibraries((prev) => {
+                                const next = [...prev]
 
-                          next[idx] = { ...next[idx], name: v }
+                                next[idx] = { ...next[idx], name: v }
 
-                          return next
-                        })
-                      }
-                    />
-
-                    <Select
-                      isDisabled={loadingProviders || providers.length === 0}
-                      label="源存储类型"
-                      selectedKeys={lib.src_type ? [lib.src_type] : []}
-                      onSelectionChange={(keys) => {
-                        const val = Array.from(keys)[0] as string
-
-                        setLibraries((prev) => {
-                          const next = [...prev]
-
-                          next[idx] = { ...next[idx], src_type: val as any }
-
-                          return next
-                        })
-                        validateAndFixTransferType(idx)
-                      }}
-                    >
-                      {providers.map((p) => (
-                        <SelectItem key={p.storage_type}>
-                          {p.storage_type}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                    <Input
-                      label="源路径"
-                      value={lib.src_path}
-                      onValueChange={(v) =>
-                        setLibraries((prev) => {
-                          const next = [...prev]
-
-                          next[idx] = { ...next[idx], src_path: v }
-
-                          return next
-                        })
-                      }
-                    />
-
-                    <Select
-                      isDisabled={loadingProviders || providers.length === 0}
-                      label="目标存储类型"
-                      selectedKeys={lib.dst_type ? [lib.dst_type] : []}
-                      onSelectionChange={(keys) => {
-                        const val = Array.from(keys)[0] as string
-
-                        setLibraries((prev) => {
-                          const next = [...prev]
-
-                          next[idx] = { ...next[idx], dst_type: val as any }
-
-                          return next
-                        })
-                        validateAndFixTransferType(idx)
-                      }}
-                    >
-                      {providers.map((p) => (
-                        <SelectItem key={p.storage_type}>
-                          {p.storage_type}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                    <Input
-                      label="目标路径"
-                      value={lib.dst_path}
-                      onValueChange={(v) =>
-                        setLibraries((prev) => {
-                          const next = [...prev]
-
-                          next[idx] = { ...next[idx], dst_path: v }
-
-                          return next
-                        })
-                      }
-                    />
-
-                    <Select
-                      label="传输类型"
-                      selectedKeys={[lib.transfer_type]}
-                      onSelectionChange={(keys) => {
-                        const val = Array.from(keys)[0] as TransferType
-
-                        setLibraries((prev) => {
-                          const next = [...prev]
-
-                          next[idx] = { ...next[idx], transfer_type: val }
-
-                          return next
-                        })
-                      }}
-                    >
-                      {getAvailableTransferTypes(
-                        lib.src_type,
-                        lib.dst_type,
-                      ).map((opt) => (
-                        <SelectItem key={opt.value}>{opt.label}</SelectItem>
-                      ))}
-                    </Select>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <Checkbox
-                        isSelected={lib.organize_by_type}
-                        size="md"
-                        onValueChange={(val) =>
-                          setLibraries((prev) => {
-                            const next = [...prev]
-
-                            next[idx] = { ...next[idx], organize_by_type: val }
-
-                            return next
-                          })
-                        }
-                      >
-                        按类型分文件夹
-                      </Checkbox>
-                      <Checkbox
-                        isSelected={lib.organize_by_category}
-                        size="md"
-                        onValueChange={(val) =>
-                          setLibraries((prev) => {
-                            const next = [...prev]
-
-                            next[idx] = {
-                              ...next[idx],
-                              organize_by_category: val,
+                                return next
+                              })
                             }
+                          />
 
-                            return next
-                          })
-                        }
-                      >
-                        按分类分文件夹
-                      </Checkbox>
-                      <Checkbox
-                        isSelected={lib.scrape}
-                        size="md"
-                        onValueChange={(val) =>
-                          setLibraries((prev) => {
-                            const next = [...prev]
-
-                            next[idx] = {
-                              ...next[idx],
-                              scrape: val,
+                          <Select
+                            isDisabled={
+                              loadingProviders || providers.length === 0
                             }
+                            label="源存储类型"
+                            selectedKeys={lib.src_type ? [lib.src_type] : []}
+                            onSelectionChange={(keys) => {
+                              const val = Array.from(keys)[0] as string
 
-                            return next
-                          })
-                        }
-                      >
-                        开启刮削
-                      </Checkbox>
-                      <Checkbox
-                        isSelected={lib.notify}
-                        size="md"
-                        onValueChange={(val) =>
-                          setLibraries((prev) => {
-                            const next = [...prev]
+                              setLibraries((prev) => {
+                                const next = [...prev]
 
-                            next[idx] = {
-                              ...next[idx],
-                              notify: val,
+                                next[idx] = {
+                                  ...next[idx],
+                                  src_type: val as any,
+                                }
+
+                                return next
+                              })
+                              validateAndFixTransferType(idx)
+                            }}
+                          >
+                            {providers.map((p) => (
+                              <SelectItem key={p.storage_type}>
+                                {p.storage_type}
+                              </SelectItem>
+                            ))}
+                          </Select>
+                          <Input
+                            label="源路径"
+                            value={lib.src_path}
+                            onValueChange={(v) =>
+                              setLibraries((prev) => {
+                                const next = [...prev]
+
+                                next[idx] = { ...next[idx], src_path: v }
+
+                                return next
+                              })
                             }
+                          />
 
-                            return next
-                          })
-                        }
-                      >
-                        入库通知
-                      </Checkbox>
-                    </div>
-                  </CardBody>
-                </Card>
-              ))}
-            </div>
+                          <Select
+                            isDisabled={
+                              loadingProviders || providers.length === 0
+                            }
+                            label="目标存储类型"
+                            selectedKeys={lib.dst_type ? [lib.dst_type] : []}
+                            onSelectionChange={(keys) => {
+                              const val = Array.from(keys)[0] as string
+
+                              setLibraries((prev) => {
+                                const next = [...prev]
+
+                                next[idx] = {
+                                  ...next[idx],
+                                  dst_type: val as any,
+                                }
+
+                                return next
+                              })
+                              validateAndFixTransferType(idx)
+                            }}
+                          >
+                            {providers.map((p) => (
+                              <SelectItem key={p.storage_type}>
+                                {p.storage_type}
+                              </SelectItem>
+                            ))}
+                          </Select>
+                          <Input
+                            label="目标路径"
+                            value={lib.dst_path}
+                            onValueChange={(v) =>
+                              setLibraries((prev) => {
+                                const next = [...prev]
+
+                                next[idx] = { ...next[idx], dst_path: v }
+
+                                return next
+                              })
+                            }
+                          />
+
+                          <Select
+                            label="传输类型"
+                            selectedKeys={[lib.transfer_type]}
+                            onSelectionChange={(keys) => {
+                              const val = Array.from(keys)[0] as TransferType
+
+                              setLibraries((prev) => {
+                                const next = [...prev]
+
+                                next[idx] = { ...next[idx], transfer_type: val }
+
+                                return next
+                              })
+                            }}
+                          >
+                            {getAvailableTransferTypes(
+                              lib.src_type,
+                              lib.dst_type,
+                            ).map((opt) => (
+                              <SelectItem key={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </Select>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <Checkbox
+                              isSelected={lib.organize_by_type}
+                              size="md"
+                              onValueChange={(val) =>
+                                setLibraries((prev) => {
+                                  const next = [...prev]
+
+                                  next[idx] = {
+                                    ...next[idx],
+                                    organize_by_type: val,
+                                  }
+
+                                  return next
+                                })
+                              }
+                            >
+                              按类型分文件夹
+                            </Checkbox>
+                            <Checkbox
+                              isSelected={lib.organize_by_category}
+                              size="md"
+                              onValueChange={(val) =>
+                                setLibraries((prev) => {
+                                  const next = [...prev]
+
+                                  next[idx] = {
+                                    ...next[idx],
+                                    organize_by_category: val,
+                                  }
+
+                                  return next
+                                })
+                              }
+                            >
+                              按分类分文件夹
+                            </Checkbox>
+                            <Checkbox
+                              isSelected={lib.scrape}
+                              size="md"
+                              onValueChange={(val) =>
+                                setLibraries((prev) => {
+                                  const next = [...prev]
+
+                                  next[idx] = {
+                                    ...next[idx],
+                                    scrape: val,
+                                  }
+
+                                  return next
+                                })
+                              }
+                            >
+                              开启刮削
+                            </Checkbox>
+                            <Checkbox
+                              isSelected={lib.notify}
+                              size="md"
+                              onValueChange={(val) =>
+                                setLibraries((prev) => {
+                                  const next = [...prev]
+
+                                  next[idx] = {
+                                    ...next[idx],
+                                    notify: val,
+                                  }
+
+                                  return next
+                                })
+                              }
+                            >
+                              入库通知
+                            </Checkbox>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    </SortableLibraryItem>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
           <div className="flex justify-end">
             <Button
