@@ -1,3 +1,5 @@
+import { TransferType } from './storage'
+
 export type MediaType = 'UnknownMediaType' | 'Movie' | 'TV'
 
 export interface MediaItem {
@@ -39,4 +41,17 @@ export interface RecognizeMediaDetail {
   item: MediaItem // 识别的媒体信息
   custom_rule: string // 匹配的自定义规则
   meta_rule: string // 应用的媒体规则
+}
+
+export interface Library {
+  name: string
+  src_path: string
+  src_type: string
+  dst_path: string
+  dst_type: string
+  transfer_type: TransferType
+  organize_by_type: boolean
+  organize_by_category: boolean
+  scrape: boolean
+  notify: boolean
 }

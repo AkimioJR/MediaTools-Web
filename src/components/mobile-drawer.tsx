@@ -24,7 +24,7 @@ export const MobileDrawer = memo(function MobileDrawer() {
           <div className="p-4">
             <div className="flex items-center gap-3">
               <div className="flex aspect-square size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 text-white">
-                <Icon icon={Wand2} size="md" color="inherit" />
+                <Icon color="inherit" icon={Wand2} size="md" />
               </div>
               <div>
                 <h2 className="font-semibold">MediaTools</h2>

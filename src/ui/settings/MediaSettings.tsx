@@ -28,6 +28,9 @@ import { CSS } from '@dnd-kit/utilities'
 
 import { useMediaConfig } from '@/hooks'
 import { StorageService } from '@/services/storage'
+import { LibraryConfig } from '@/types/config'
+
+type SortableLibrary = LibraryConfig & { id: string }
 
 export function MediaSettings() {
   const {
@@ -47,25 +50,40 @@ export function MediaSettings() {
     updateLibrariesData,
   } = useMediaConfig()
 
-  // dnd-kit
+  const [sortableLibraries, setSortableLibraries] = useState<SortableLibrary[]>(
+    [],
+  )
+
+  useEffect(() => {
+    setSortableLibraries(
+      libraries.map((lib, i) => ({
+        ...lib,
+        id: lib.name || String(i),
+      })),
+    )
+  }, [libraries])
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   )
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return
-    const oldIndex = libraries.findIndex(
-      (_, i) => String(i) === String(active.id),
-    )
-    const newIndex = libraries.findIndex(
-      (_, i) => String(i) === String(over.id),
-    )
 
-    if (oldIndex === -1 || newIndex === -1) return
-    setLibraries((prev) => arrayMove(prev, oldIndex, newIndex))
+    setSortableLibraries((prev) => {
+      const oldIndex = prev.findIndex((item) => item.id === active.id)
+      const newIndex = prev.findIndex((item) => item.id === over.id)
+
+      if (oldIndex === -1 || newIndex === -1) return prev
+
+      const moved = arrayMove(prev, oldIndex, newIndex)
+
+      setLibraries(moved.map(({ id: _, ...rest }) => rest))
+
+      return moved
+    })
   }
 
-  // 自定义识别词提示内容
   const identifyWordHints: string[] = [
     '屏蔽词',
     '被替换词 => 替换词',
@@ -74,7 +92,6 @@ export function MediaSettings() {
     '（其中<被替换词>支持正则表达式，其余不支持，单独一个<被替换词>则会被替换为空字符串）',
   ]
 
-  // 媒体库配置（提供者 + 列表 + 传输类型校验）
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
   const [loadingProviders, setLoadingProviders] = useState(false)
 
@@ -334,7 +351,7 @@ export function MediaSettings() {
             </Button>
           </div>
 
-          {libraries.length === 0 ? (
+          {sortableLibraries.length === 0 ? (
             <div className="text-center py-8 text-foreground-500">
               暂无媒体库配置
             </div>
@@ -346,12 +363,12 @@ export function MediaSettings() {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={libraries.map((_, i) => String(i))}
+                items={sortableLibraries.map((lib) => lib.id)}
                 strategy={rectSortingStrategy}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {libraries.map((lib, idx) => (
-                    <SortableLibraryItem key={String(idx)} id={String(idx)}>
+                  {sortableLibraries.map((lib, idx) => (
+                    <SortableLibraryItem key={lib.id} id={lib.id}>
                       <Card radius="lg" shadow="sm">
                         <CardBody className="space-y-2">
                           <div className="flex items-center justify-between">

@@ -1,3 +1,5 @@
+import { TransferType } from './storage'
+
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 // 日志配置接口
@@ -43,7 +45,7 @@ export interface LibraryConfig {
   src_type: string // 源类型
   dst_type: string // 目标类型
   dst_path: string // 目标路径
-  transfer_type: string // 传输类型
+  transfer_type: TransferType // 传输类型
   organize_by_type: boolean // 是否按类型分文件夹
   organize_by_category: boolean // 是否按分类分文件夹
   scrape: boolean // 是否刮削
