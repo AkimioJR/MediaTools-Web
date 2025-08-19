@@ -15,7 +15,6 @@ import { Spinner } from '@heroui/spinner'
 import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
 import { Switch } from '@heroui/switch'
-import { Pagination } from '@heroui/pagination'
 import {
   File,
   Folder,
@@ -27,10 +26,13 @@ import {
   Move,
   FolderPlus,
   ScanSearch,
+  ArrowDownAZ,
+  ClockArrowDown,
 } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAsyncList } from '@react-stately/data'
 
+import { HeaderIcon } from '@/components/icon'
 import { StorageService } from '@/services/storage'
 import { showSuccess, handleApiError } from '@/utils/message'
 import { useModal } from '@/components/modal-provider'
@@ -40,7 +42,6 @@ interface FileColumn {
   key: string
   label: string
   className?: string
-  width?: number
 }
 
 interface LoadingStates {
@@ -60,9 +61,9 @@ const STORAGE_KEYS = {
 
 const TABLE_COLUMNS: FileColumn[] = [
   { key: 'name', label: '名称' },
-  { key: 'size', label: '大小', className: 'hidden sm:table-cell' },
-  { key: 'mod_time', label: '修改时间', className: 'hidden sm:table-cell' },
-  { key: 'actions', label: '操作', className: 'sm:w-[200px]', width: 120 },
+  // { key: 'size', label: '大小', className: 'hidden sm:table-cell' },
+  // { key: 'mod_time', label: '修改时间', className: 'hidden sm:table-cell' },
+  { key: 'actions', label: '操作' },
 ]
 
 const getSavedSortDescriptor = () => {
@@ -113,6 +114,7 @@ export default function StoragePage() {
   const [showHiddenFiles, setShowHiddenFiles] = useState(
     getShowHiddenFilesSetting,
   )
+  const [sortMode, setSortMode] = useState<'name' | 'mod_time'>('name')
 
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({
     providers: false,
@@ -207,10 +209,6 @@ export default function StoragePage() {
 
         const isADirectory = a.type === 'Directory'
         const isBDirectory = b.type === 'Directory'
-
-        // if (column !== 'name' && isADirectory !== isBDirectory) {
-        //   return isADirectory ? -1 : 1
-        // }
 
         let result = 0
 
@@ -532,6 +530,17 @@ export default function StoragePage() {
     )
   }, [showHiddenFiles])
 
+  const handleSwitchSort = useCallback(() => {
+    const newSortMode = sortMode === 'name' ? 'mod_time' : 'name'
+
+    setSortMode(newSortMode)
+
+    fileList.sort({
+      column: newSortMode,
+      direction: 'ascending',
+    })
+  }, [sortMode, fileList])
+
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
       {/* 操作工具栏 */}
@@ -640,6 +649,17 @@ export default function StoragePage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <Button
+                  isIconOnly
+                  aria-label="切换排序"
+                  size="sm"
+                  variant="light"
+                  onPress={handleSwitchSort}
+                >
+                  <HeaderIcon
+                    icon={sortMode === 'name' ? ArrowDownAZ : ClockArrowDown}
+                  />
+                </Button>
                 <span className="text-xs sm:text-sm text-foreground-500">
                   显示隐藏文件
                 </span>
@@ -660,6 +680,7 @@ export default function StoragePage() {
         <CardBody className="p-0">
           <div className="overflow-x-auto">
             <Table
+              hideHeader
               isStriped
               removeWrapper
               aria-label="文件列表"
@@ -680,7 +701,6 @@ export default function StoragePage() {
                       column.key === 'size'
                     }
                     className={column.className}
-                    width={column.width || null}
                   >
                     {column.label}
                   </TableColumn>
@@ -729,8 +749,8 @@ export default function StoragePage() {
                           )
                         case 'actions':
                           return (
-                            <TableCell>
-                              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 ease">
+                            <TableCell width="20%">
+                              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 ease ">
                                 <Button
                                   isIconOnly
                                   aria-label="识别媒体"
@@ -796,21 +816,6 @@ export default function StoragePage() {
               </TableBody>
             </Table>
           </div>
-
-          {/* 分页组件 */}
-          {filteredItems?.length > 0 && (
-            <div className="flex justify-center py-3 sm:py-4">
-              <Pagination
-                showControls
-                showShadow
-                color="primary"
-                page={page}
-                size="sm"
-                total={pages}
-                onChange={setPage}
-              />
-            </div>
-          )}
         </CardBody>
       </Card>
     </div>
