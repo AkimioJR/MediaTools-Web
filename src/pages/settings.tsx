@@ -798,6 +798,42 @@ function MediaSettings() {
                       >
                         按分类分文件夹
                       </Checkbox>
+                      <Checkbox
+                        isSelected={lib.scrape}
+                        size="md"
+                        onValueChange={(val) =>
+                          setLibraries((prev) => {
+                            const next = [...prev]
+
+                            next[idx] = {
+                              ...next[idx],
+                              scrape: val,
+                            }
+
+                            return next
+                          })
+                        }
+                      >
+                        开启刮削
+                      </Checkbox>
+                      <Checkbox
+                        isSelected={lib.notify}
+                        size="md"
+                        onValueChange={(val) =>
+                          setLibraries((prev) => {
+                            const next = [...prev]
+
+                            next[idx] = {
+                              ...next[idx],
+                              notify: val,
+                            }
+
+                            return next
+                          })
+                        }
+                      >
+                        入库通知
+                      </Checkbox>
                     </div>
                   </CardBody>
                 </Card>
