@@ -71,12 +71,9 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* 设置内容（随 tabs 切换） */}
-      <Card radius="lg" shadow="sm">
-        {selectedTab === 'log' && <LogSettings />}
-        {selectedTab === 'scrape' && <ScrapeSettings />}
-        {selectedTab === 'media' && <MediaSettings />}
-      </Card>
+      {selectedTab === 'log' && <LogSettings />}
+      {selectedTab === 'scrape' && <ScrapeSettings />}
+      {selectedTab === 'media' && <MediaSettings />}
     </div>
   )
 }
@@ -114,54 +111,58 @@ function LogSettings() {
   }
 
   return (
-    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Select
-          label="终端日志级别"
-          placeholder="选择日志级别"
-          selectedKeys={
-            logConfig.console_level ? [logConfig.console_level] : []
-          }
-          onSelectionChange={(keys) =>
-            updateConfig({
-              console_level: Array.from(keys)[0] as LogLevel,
-            })
-          }
-        >
-          {logLevels.map((level) => (
-            <SelectItem key={level.value}>{level.label}</SelectItem>
-          ))}
-        </Select>
+    <Card radius="lg" shadow="sm">
+      <CardBody>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Select
+              label="终端日志级别"
+              placeholder="选择日志级别"
+              selectedKeys={
+                logConfig.console_level ? [logConfig.console_level] : []
+              }
+              onSelectionChange={(keys) =>
+                updateConfig({
+                  console_level: Array.from(keys)[0] as LogLevel,
+                })
+              }
+            >
+              {logLevels.map((level) => (
+                <SelectItem key={level.value}>{level.label}</SelectItem>
+              ))}
+            </Select>
 
-        <Select
-          label="文件日志级别"
-          placeholder="选择日志级别"
-          selectedKeys={logConfig.file_level ? [logConfig.file_level] : []}
-          onSelectionChange={(keys) =>
-            updateConfig({
-              file_level: Array.from(keys)[0] as LogLevel,
-            })
-          }
-        >
-          {logLevels.map((level) => (
-            <SelectItem key={level.value}>{level.label}</SelectItem>
-          ))}
-        </Select>
-      </div>
+            <Select
+              label="文件日志级别"
+              placeholder="选择日志级别"
+              selectedKeys={logConfig.file_level ? [logConfig.file_level] : []}
+              onSelectionChange={(keys) =>
+                updateConfig({
+                  file_level: Array.from(keys)[0] as LogLevel,
+                })
+              }
+            >
+              {logLevels.map((level) => (
+                <SelectItem key={level.value}>{level.label}</SelectItem>
+              ))}
+            </Select>
+          </div>
 
-      <Input
-        label="日志文件目录"
-        placeholder="输入日志文件目录路径"
-        value={logConfig.file_dir || ''}
-        onValueChange={(value) => updateConfig({ file_dir: value })}
-      />
+          <Input
+            label="日志文件目录"
+            placeholder="输入日志文件目录路径"
+            value={logConfig.file_dir || ''}
+            onValueChange={(value) => updateConfig({ file_dir: value })}
+          />
 
-      <div className="flex justify-end">
-        <Button color="primary" isLoading={loading} onPress={updateData}>
-          {loading ? '保存中...' : '保存配置'}
-        </Button>
-      </div>
-    </div>
+          <div className="flex justify-end">
+            <Button color="primary" isLoading={loading} onPress={updateData}>
+              {loading ? '保存中...' : '保存配置'}
+            </Button>
+          </div>
+        </div>
+      </CardBody>
+    </Card>
   )
 }
 
@@ -201,7 +202,7 @@ function ScrapeSettings() {
   }
 
   return (
-    <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* TMDB 设置 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
@@ -214,7 +215,6 @@ function ScrapeSettings() {
           <Input
             label="TMDB API Key"
             placeholder="输入 TMDB API Key"
-            type="password"
             value={tmdbConfig?.api_key || ''}
             onValueChange={(value) => updateTmdbConfig({ api_key: value })}
           />
@@ -299,7 +299,6 @@ function ScrapeSettings() {
           <Input
             label="Fanart API Key"
             placeholder="输入 Fanart API Key"
-            type="password"
             value={fanartConfig?.api_key || ''}
             onValueChange={(value) => updateFanartConfig({ api_key: value })}
           />
@@ -492,7 +491,7 @@ function MediaSettings() {
   }
 
   return (
-    <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* 媒体库重命名格式 */}
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
