@@ -22,6 +22,7 @@ import {
   Toolbar,
   CopyMoveForm,
   FileActions,
+  ManualSortingForm,
   type SortMode,
   type SortOptionType,
 } from '@/ui/storage'
@@ -366,6 +367,13 @@ export default function StoragePage() {
     [setCurrentSortMode],
   )
 
+  const handleManualSort = useCallback(async (file: StorageFileInfo) => {
+    await openModal(() => <ManualSortingForm file={file} />, {
+      title: '手动整理',
+      size: '3xl',
+    })
+  }, [])
+
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
       {/* 操作工具栏 */}
@@ -471,6 +479,7 @@ export default function StoragePage() {
                                 onCopy={openCopyModal}
                                 onDelete={handleDelete}
                                 onDownload={handleDownload}
+                                onManualSort={handleManualSort}
                                 onMove={openMoveModal}
                                 onRecognize={handleRecognizeSelectedMedia}
                               />
