@@ -7,7 +7,7 @@ import { Button } from '@heroui/button'
 import { Spinner } from '@heroui/spinner'
 import { useEffect } from 'react'
 
-import { useLogConfig } from '@/hooks'
+import { useLogConfig } from '@/hooks/settings'
 
 export function LogSettings() {
   const { logConfig, loading, loadData, updateData, updateConfig } =

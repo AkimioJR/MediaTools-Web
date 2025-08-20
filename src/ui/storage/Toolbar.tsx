@@ -3,6 +3,12 @@ import type { StorageProviderInterface } from '@/types/storage'
 import { Button } from '@heroui/button'
 import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from '@heroui/dropdown'
 import { Switch } from '@heroui/switch'
 import {
   Database,
@@ -10,9 +16,31 @@ import {
   Upload,
   ArrowDownAZ,
   ClockArrowDown,
+  ArrowUpAZ,
+  ClockArrowUp,
+  type LucideIcon,
 } from 'lucide-react'
 
 import { HeaderIcon } from '@/components/icon'
+
+export type SortMode =
+  | 'name_asc'
+  | 'name_desc'
+  | 'mod_time_asc'
+  | 'mod_time_desc'
+
+export interface SortOptionType {
+  label: string
+  value: SortMode
+  icon: LucideIcon
+}
+
+const SORT_OPTIONS: SortOptionType[] = [
+  { label: '按名称升序', value: 'name_asc', icon: ArrowDownAZ },
+  { label: '按名称降序', value: 'name_desc', icon: ArrowUpAZ },
+  { label: '按修改时间升序', value: 'mod_time_asc', icon: ClockArrowDown },
+  { label: '按修改时间降序', value: 'mod_time_desc', icon: ClockArrowUp },
+]
 
 export function Toolbar({
   providers,
@@ -39,14 +67,14 @@ export function Toolbar({
   pathInputValue: string
   loadingUpload: boolean
   showHiddenFiles: boolean
-  sortMode: 'name' | 'mod_time'
+  sortMode: SortMode
   onProviderChange: (key: string) => void
   onBreadcrumbClick: (path: string) => void
   onTogglePathInput: () => void
   onPathInputChange: (v: string) => void
   onCreateFolder: () => void
   onUpload: () => void
-  onToggleSort: () => void
+  onToggleSort: (sortOption: SortOptionType) => void
   onToggleHidden: (v: boolean) => void
 }) {
   return (
@@ -145,17 +173,36 @@ export function Toolbar({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            isIconOnly
-            aria-label="切换排序"
-            size="sm"
-            variant="light"
-            onPress={onToggleSort}
-          >
-            <HeaderIcon
-              icon={sortMode === 'name' ? ArrowDownAZ : ClockArrowDown}
-            />
-          </Button>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button
+                isIconOnly
+                aria-label="切换排序"
+                size="sm"
+                variant="light"
+              >
+                <HeaderIcon
+                  icon={
+                    SORT_OPTIONS.find((mode) => mode.value === sortMode)
+                      ?.icon || ArrowDownAZ
+                  }
+                />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu>
+              {SORT_OPTIONS.map((mode) => (
+                <DropdownItem
+                  key={mode.value}
+                  onPress={() => {
+                    onToggleSort(mode)
+                  }}
+                >
+                  {mode.label}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+
           <span className="text-xs sm:text-sm text-foreground-500">
             显示隐藏文件
           </span>

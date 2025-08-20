@@ -6,7 +6,7 @@ import { Spinner } from '@heroui/spinner'
 import { Image, Video } from 'lucide-react'
 import { useEffect } from 'react'
 
-import { useTMDBConfig, useFanartConfig } from '@/hooks'
+import { useTMDBConfig, useFanartConfig } from '@/hooks/settings'
 
 export function ScrapeSettings() {
   const {

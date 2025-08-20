@@ -26,7 +26,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-import { useMediaConfig } from '@/hooks'
+import { useMediaConfig } from '@/hooks/settings'
 import { StorageService } from '@/services/storage'
 import { LibraryConfig } from '@/types/config'
 
@@ -283,8 +283,10 @@ export function MediaSettings() {
                 <div className="flex items-center gap-2">
                   <p>自定义识别词</p>
                   <Tooltip
+                    showArrow
+                    closeDelay={0}
                     content={
-                      <div className="text-xs space-y-1 max-w-xs">
+                      <div className="text-xs space-y-1 max-w-xs p-1">
                         {identifyWordHints.map((line, i) => (
                           <p key={i}>{line}</p>
                         ))}
@@ -292,7 +294,7 @@ export function MediaSettings() {
                     }
                     placement="right"
                   >
-                    <Info className="w-4 h-4 text-foreground-500" />
+                    <Info className="w-4 h-4 text-foreground-500 cursor-default" />
                   </Tooltip>
                 </div>
               }
