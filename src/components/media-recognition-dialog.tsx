@@ -331,7 +331,8 @@ const MediaDetail = React.memo(function MediaDetail({
             { label: '季数', value: item.season_str },
             { label: '集数', value: item.episode_str },
             { label: '集标题', value: item.episode_title },
-            { label: '发布日期', value: item.episode_date },
+            { label: '季发布年份', value: item.season_year },
+            { label: '集发布日期', value: item.episode_date },
           ])}
         </div>
       ),
