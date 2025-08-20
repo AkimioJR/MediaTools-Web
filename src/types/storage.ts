@@ -17,10 +17,10 @@ export interface StorageFileInfo {
   path: string
   name: string
   ext: string
+  type: FileType
 
   // detail 才有以下属性
   size?: number
-  type?: FileType
   mod_time?: string
 }
 
