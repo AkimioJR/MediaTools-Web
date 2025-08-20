@@ -280,13 +280,13 @@ const MediaDetail = React.memo(function MediaDetail({
               { label: '视频编码', value: item.video_encode },
               { label: '音频编码', value: item.audio_encode },
               { label: '资源类型', value: item.resource_type },
+              { label: '分段', value: item.part },
+              { label: '版本', value: item.version },
               { label: '平台', value: item.platform },
-              { label: '发布版本', value: item.version },
               { label: '文件扩展名', value: item.file_extension },
             ],
             true,
           )}
-
           {item.release_groups.length > 0 && (
             <div>
               <p className="text-sm font-medium text-default-600 mb-2">
