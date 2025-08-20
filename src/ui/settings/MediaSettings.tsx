@@ -90,6 +90,7 @@ export function MediaSettings() {
     '前定位词 <> 后定位词 >> 集偏移量（EP）',
     '被替换词 => 替换词 && 前定位词 <> 后定位词 >> 集偏移量（EP）',
     '（其中<被替换词>支持正则表达式，其余不支持，单独一个<被替换词>则会被替换为空字符串）',
+    '{[tmdbid=xxx;type=movie/tv;s=xxx;e=xxx]} 直接指定 TMDB ID，其中s、e为季数和集数',
   ]
 
   const [providers, setProviders] = useState<StorageProviderInterface[]>([])
