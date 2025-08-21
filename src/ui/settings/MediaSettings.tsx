@@ -63,12 +63,17 @@ export function MediaSettings() {
     [],
   )
 
+  const generateId = () =>
+    `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+
   useEffect(() => {
-    setSortableLibraries(
-      libraries.map((lib, i) => ({
-        ...lib,
-        id: lib.name || String(i),
-      })),
+    setSortableLibraries((prev) =>
+      libraries.map((lib, i) => {
+        const existing = prev[i]
+        const id = existing?.id || generateId()
+
+        return { ...lib, id }
+      }),
     )
   }, [libraries])
 

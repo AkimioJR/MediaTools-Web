@@ -119,24 +119,20 @@ export const useMediaConfig = () => {
   }, [customWordConfig])
 
   return {
-    // 数据
     libraries,
     formatConfig,
     customWordConfig,
     loading,
 
-    // 加载方法
     loadLibrariesData,
     loadFormatData,
     loadCustomWordData,
     loadAllData,
 
-    // 更新方法
     updateLibrariesData,
     updateFormatData,
     updateCustomWordData,
 
-    // 设置方法
     setLibraries,
     setFormatConfig,
     setCustomWordConfig,
