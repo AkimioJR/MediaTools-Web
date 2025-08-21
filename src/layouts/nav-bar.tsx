@@ -16,7 +16,6 @@ export function NavBar() {
   const { openModal } = useModal()
   const location = useLocation()
 
-  // 使用 useMemo 缓存页面标题
   const pageTitle = useMemo(() => {
     const currentMenuItem = siteConfig.navMenuItems.find(
       (item) => item.href === location.pathname,

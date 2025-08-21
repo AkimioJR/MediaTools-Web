@@ -5,7 +5,9 @@ import { Input } from '@heroui/input'
 import { Button } from '@heroui/button'
 import { Select, SelectItem } from '@heroui/select'
 import { Switch } from '@heroui/switch'
-import { Plus, Play } from 'lucide-react'
+import { Plus } from 'lucide-react'
+
+import { ButtonIcon } from '@/components/icon'
 
 const targetStorageOptions = [
   {
@@ -44,9 +46,7 @@ const fileTypeOptions = [
   },
 ]
 
-export const ManualSortingForm = (params: { file: StorageFileInfo }) => {
-  const { file } = params
-
+export const ManualSortingForm = (_params: { file: StorageFileInfo }) => {
   return (
     <Form className="grid grid-cols-2 gap-4">
       <Select label="目的存储">
@@ -118,17 +118,10 @@ export const ManualSortingForm = (params: { file: StorageFileInfo }) => {
       <div className="col-span-2 flex justify-end gap-4">
         <Button
           color="success"
-          startContent={<Plus height={16} width={16} />}
-          variant="flat"
+          startContent={<ButtonIcon icon={Plus} />}
+          variant="shadow"
         >
           加入整理队列
-        </Button>
-        <Button
-          color="secondary"
-          startContent={<Play height={16} width={16} />}
-          variant="flat"
-        >
-          立即整理
         </Button>
       </div>
     </Form>

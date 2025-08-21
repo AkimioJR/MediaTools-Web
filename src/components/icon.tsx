@@ -108,7 +108,7 @@ export function HeaderIcon({
 
 /**
  * 按钮图标组件
- * 用于按钮内的图标，继承按钮的颜色
+ * 用于按钮内的图标，统一尺寸大小
  */
 export function ButtonIcon({
   icon,

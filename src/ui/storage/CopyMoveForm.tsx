@@ -27,7 +27,6 @@ export function CopyMoveForm({
         aria-label="目标存储器"
         label="目标存储器"
         selectedKeys={provider ? [provider] : []}
-        variant="bordered"
         onSelectionChange={(keys) => setProvider(Array.from(keys)[0] as string)}
       >
         {providers.map((p) => (
@@ -38,14 +37,17 @@ export function CopyMoveForm({
         label="目标路径"
         placeholder="请输入目标路径"
         value={path}
-        variant="bordered"
         onValueChange={setPath}
       />
       <div className="flex justify-end gap-2">
-        <Button variant="light" onPress={onCancel}>
+        <Button variant="shadow" onPress={onCancel}>
           取消
         </Button>
-        <Button color="primary" onPress={() => onSubmit(provider, path)}>
+        <Button
+          color="primary"
+          variant="shadow"
+          onPress={() => onSubmit(provider, path)}
+        >
           确认
         </Button>
       </div>

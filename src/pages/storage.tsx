@@ -17,6 +17,7 @@ import { useDataSort } from '@/hooks/storage'
 import { StorageService } from '@/services/storage'
 import { showSuccess, handleApiError } from '@/utils/message'
 import { useModal } from '@/components/modal-provider'
+import { useConfirmModal } from '@/hooks/useConfirmModal'
 import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 import {
   Toolbar,
@@ -26,6 +27,7 @@ import {
   type SortMode,
   type SortOptionType,
 } from '@/ui/storage'
+import { CreateFolder } from '@/ui/storage/CreateFolder'
 
 interface FileColumn {
   key: string
@@ -90,7 +92,7 @@ export default function StoragePage() {
   })
 
   const { openModal } = useModal()
-
+  const { open: openConfirmModal } = useConfirmModal()
   const breadcrumbs = useMemo(() => {
     const parts = currentPath.split('/').filter(Boolean)
     const breadcrumbs = [{ title: '根目录', path: '' }]
@@ -197,7 +199,12 @@ export default function StoragePage() {
   }, [showPathInput, pathInputValue, currentPath])
 
   const handleCreateFolder = useCallback(async () => {
-    const name = prompt('请输入文件夹名称:')
+    const name = await openModal(
+      (close) => <CreateFolder onSubmit={(name) => close(name)} />,
+      {
+        title: '创建文件夹',
+      },
+    )
 
     if (!name || !storageType) return
 
@@ -274,16 +281,19 @@ export default function StoragePage() {
 
   const handleDelete = useCallback(
     async (file: StorageFileInfo) => {
-      if (!confirm(`确定要删除 "${file.name}" 吗？`)) return
-
-      await handleAsyncOperation(
-        async () => {
-          await StorageService.Delete(storageType, file.path)
-          await fetchFiles()
+      await openConfirmModal({
+        title: `确定要删除 "${file.name}" 吗？`,
+        onConfirm: () => {
+          handleAsyncOperation(
+            async () => {
+              await StorageService.Delete(storageType, file.path)
+              await fetchFiles()
+            },
+            'delete',
+            '文件删除成功',
+          )
         },
-        'delete',
-        '文件删除成功',
-      )
+      })
     },
     [storageType, handleAsyncOperation, fetchFiles],
   )
@@ -292,13 +302,13 @@ export default function StoragePage() {
     const result = await openModal<
       { provider: string; path: string } | undefined
     >(
-      (modal) => (
+      (close) => (
         <CopyMoveForm
           defaultPath={currentPath}
           defaultProvider={storageType}
           providers={providers}
-          onCancel={() => modal.close(undefined)}
-          onSubmit={(provider, path) => modal.close({ provider, path })}
+          onCancel={() => close(undefined)}
+          onSubmit={(provider, path) => close({ provider, path })}
         />
       ),
       { title: '复制到' },
@@ -324,13 +334,13 @@ export default function StoragePage() {
     const result = await openModal<
       { provider: string; path: string } | undefined
     >(
-      (modal) => (
+      (close) => (
         <CopyMoveForm
           defaultPath={currentPath}
           defaultProvider={storageType}
           providers={providers}
-          onCancel={() => modal.close(undefined)}
-          onSubmit={(provider, path) => modal.close({ provider, path })}
+          onCancel={() => close(undefined)}
+          onSubmit={(provider, path) => close({ provider, path })}
         />
       ),
       { title: '移动到' },

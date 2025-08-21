@@ -1,13 +1,15 @@
 import type { LogLevel } from '@/types'
 
-import { Card, CardBody } from '@heroui/card'
+import { Card, CardBody, CardHeader } from '@heroui/card'
 import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
 import { Button } from '@heroui/button'
 import { Spinner } from '@heroui/spinner'
+import { Save, ClipboardClock } from 'lucide-react'
 import { useEffect } from 'react'
 
 import { useLogConfig } from '@/hooks/settings'
+import { ButtonIcon } from '@/components/icon'
 
 export function LogSettings() {
   const { logConfig, loading, loadData, updateData, updateConfig } =
@@ -42,6 +44,12 @@ export function LogSettings() {
 
   return (
     <Card radius="lg" shadow="sm">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <ClipboardClock className="w-5 h-5 text-primary" />
+          <h3 className="text-base sm:text-lg font-semibold">日志设置</h3>
+        </div>
+      </CardHeader>
       <CardBody>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -86,8 +94,14 @@ export function LogSettings() {
           />
 
           <div className="flex justify-end">
-            <Button color="primary" isLoading={loading} onPress={updateData}>
-              {loading ? '保存中...' : '保存配置'}
+            <Button
+              color="primary"
+              isLoading={loading}
+              startContent={<ButtonIcon icon={Save} />}
+              variant="shadow"
+              onPress={updateData}
+            >
+              {loading ? '保存中...' : '保存'}
             </Button>
           </div>
         </div>

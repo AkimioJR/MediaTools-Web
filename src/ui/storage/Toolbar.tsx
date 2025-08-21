@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-import { HeaderIcon } from '@/components/icon'
+import { ButtonIcon, HeaderIcon } from '@/components/icon'
 
 export type SortMode =
   | 'name_asc'
@@ -154,8 +154,8 @@ export function Toolbar({
             color="primary"
             isDisabled={!storageType}
             size="sm"
-            startContent={<FolderPlus className="w-4 h-4" />}
-            variant="solid"
+            startContent={<ButtonIcon icon={FolderPlus} />}
+            variant="shadow"
             onPress={onCreateFolder}
           >
             新建文件夹
@@ -164,8 +164,8 @@ export function Toolbar({
             color="success"
             isDisabled={!storageType || loadingUpload}
             size="sm"
-            startContent={<Upload className="w-4 h-4" />}
-            variant="solid"
+            startContent={<ButtonIcon icon={Upload} />}
+            variant="shadow"
             onPress={onUpload}
           >
             {loadingUpload ? '上传中...' : '上传文件'}

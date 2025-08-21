@@ -3,10 +3,11 @@ import { Input } from '@heroui/input'
 import { Select, SelectItem } from '@heroui/select'
 import { Button } from '@heroui/button'
 import { Spinner } from '@heroui/spinner'
-import { Image, Video } from 'lucide-react'
+import { Save, HardDrive } from 'lucide-react'
 import { useEffect } from 'react'
 
 import { useTMDBConfig, useFanartConfig } from '@/hooks/settings'
+import { ButtonIcon } from '@/components/icon'
 
 export function ScrapeSettings() {
   const {
@@ -48,7 +49,7 @@ export function ScrapeSettings() {
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Video className="w-5 h-5 text-primary" />
+            <HardDrive className="w-5 h-5 text-primary" />
             <h3 className="text-base sm:text-lg font-semibold">TMDB 设置</h3>
           </div>
         </CardHeader>
@@ -120,9 +121,11 @@ export function ScrapeSettings() {
             <Button
               color="primary"
               isLoading={tmdbLoading}
+              startContent={<ButtonIcon icon={Save} />}
+              variant="shadow"
               onPress={updateTmdbData}
             >
-              {tmdbLoading ? '保存中...' : '保存 TMDB 配置'}
+              {tmdbLoading ? '保存中...' : '保存'}
             </Button>
           </div>
         </CardBody>
@@ -132,7 +135,7 @@ export function ScrapeSettings() {
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Image className="w-5 h-5 text-primary" />
+            <HardDrive className="w-5 h-5 text-primary" />
             <h3 className="text-base sm:text-lg font-semibold">Fanart 设置</h3>
           </div>
         </CardHeader>
@@ -172,9 +175,11 @@ export function ScrapeSettings() {
             <Button
               color="primary"
               isLoading={fanartLoading}
+              startContent={<ButtonIcon icon={Save} />}
+              variant="shadow"
               onPress={updateFanartData}
             >
-              {fanartLoading ? '保存中...' : '保存 Fanart 配置'}
+              {fanartLoading ? '保存中...' : '保存'}
             </Button>
           </div>
         </CardBody>

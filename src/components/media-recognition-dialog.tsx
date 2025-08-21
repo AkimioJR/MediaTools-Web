@@ -501,6 +501,7 @@ export function MediaRecognitionDialog({
             color="primary"
             isDisabled={!mediaTitle.trim() || isLoading}
             isLoading={isLoading}
+            variant="shadow"
             onPress={() => handleRecognize()}
           >
             {getButtonText()}

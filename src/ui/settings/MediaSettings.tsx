@@ -8,7 +8,15 @@ import { Button } from '@heroui/button'
 import { Spinner } from '@heroui/spinner'
 import { Tooltip } from '@heroui/tooltip'
 import { Checkbox } from '@heroui/checkbox'
-import { FileText, Video, Info, GripVertical } from 'lucide-react'
+import {
+  FileText,
+  Info,
+  GripVertical,
+  Save,
+  Plus,
+  FolderPen,
+  DatabaseZap,
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import {
   DndContext,
@@ -29,6 +37,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useMediaConfig } from '@/hooks/settings'
 import { StorageService } from '@/services/storage'
 import { LibraryConfig } from '@/types/config'
+import { ButtonIcon } from '@/components/icon'
 
 type SortableLibrary = LibraryConfig & { id: string }
 
@@ -218,7 +227,7 @@ export function MediaSettings() {
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Video className="w-5 h-5 text-primary" />
+            <FolderPen className="w-5 h-5 text-primary" />
             <h3 className="text-base sm:text-lg font-semibold">
               媒体库重命名格式
             </h3>
@@ -257,9 +266,11 @@ export function MediaSettings() {
             <Button
               color="primary"
               isLoading={loading}
+              startContent={<ButtonIcon icon={Save} />}
+              variant="shadow"
               onPress={updateFormatData}
             >
-              {loading ? '保存中...' : '保存重命名格式'}
+              {loading ? '保存中...' : '保存'}
             </Button>
           </div>
         </CardBody>
@@ -331,9 +342,11 @@ export function MediaSettings() {
             <Button
               color="primary"
               isLoading={loading}
+              startContent={<ButtonIcon icon={Save} />}
+              variant="shadow"
               onPress={updateCustomWordData}
             >
-              {loading ? '保存中...' : '保存自定义词条配置'}
+              {loading ? '保存中...' : '保存'}
             </Button>
           </div>
         </CardBody>
@@ -343,13 +356,19 @@ export function MediaSettings() {
       <Card radius="lg" shadow="sm">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
+            <DatabaseZap className="w-5 h-5 text-primary" />
             <h3 className="text-base sm:text-lg font-semibold">媒体库配置</h3>
           </div>
         </CardHeader>
         <CardBody className="pt-0 space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Button color="primary" onPress={addLibrary}>
+            <Button
+              color="primary"
+              size="sm"
+              startContent={<ButtonIcon icon={Plus} />}
+              variant="shadow"
+              onPress={addLibrary}
+            >
               添加媒体库
             </Button>
           </div>
@@ -599,9 +618,11 @@ export function MediaSettings() {
             <Button
               color="primary"
               isLoading={loading}
+              startContent={<ButtonIcon icon={Save} />}
+              variant="shadow"
               onPress={updateLibrariesData}
             >
-              {loading ? '保存中...' : '保存媒体库配置'}
+              {loading ? '保存中...' : '保存'}
             </Button>
           </div>
         </CardBody>
