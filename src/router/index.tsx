@@ -4,6 +4,7 @@ import RootLayout from '@/layouts/root-layout'
 import DashboardPage from '@/pages/dashboard'
 import StoragePage from '@/pages/storage'
 import SettingsPage from '@/pages/settings'
+import NotFoundPage from '@/pages/404'
 
 export const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ export const router = createBrowserRouter([
       { path: 'storage', element: <StoragePage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 ])
 
