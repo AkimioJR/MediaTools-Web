@@ -1,4 +1,4 @@
-import type { StorageProviderInterface, TransferType } from '@/types/storage'
+import type { TransferType } from '@/types/storage'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 
 import { Button } from '@heroui/button'
@@ -24,9 +24,9 @@ import { TRANSFER_TYPE_OPTIONS, SETTINGS_STYLES } from './constants'
 import { LibraryItem, CustomWordConfig, FormatConfig } from './components'
 
 import { useMediaConfig, useSettingsLoader } from '@/hooks/settings'
-import { StorageService } from '@/services/storage'
 import { LibraryConfig } from '@/types/config'
 import { ButtonIcon } from '@/components/icon'
+import { useAppStore } from '@/stores/useAppStore'
 
 type SortableLibrary = LibraryConfig & { id: string }
 
@@ -50,8 +50,7 @@ export function MediaSettings() {
   const [sortableLibraries, setSortableLibraries] = useState<SortableLibrary[]>(
     [],
   )
-  const [providers, setProviders] = useState<StorageProviderInterface[]>([])
-  const [loadingProviders, setLoadingProviders] = useState(false)
+  const { providers } = useAppStore()
   const [activeId, setActiveId] = useState<string | null>(null)
 
   useSettingsLoader({ loadData: loadFormatData })
@@ -71,21 +70,6 @@ export function MediaSettings() {
       }),
     )
   }, [libraries])
-
-  useEffect(() => {
-    const loadProviders = async () => {
-      setLoadingProviders(true)
-      try {
-        const list = await StorageService.ProviderService.getProviderList()
-
-        setProviders(list)
-      } finally {
-        setLoadingProviders(false)
-      }
-    }
-
-    loadProviders()
-  }, [])
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -297,7 +281,7 @@ export function MediaSettings() {
                     idx={idx}
                     isDraggingOver={activeId !== null && activeId !== lib.id}
                     lib={lib}
-                    loadingProviders={loadingProviders}
+                    loadingProviders={false}
                     providers={providers}
                     validateAndFixTransferType={validateAndFixTransferType}
                     onRemove={removeLibrary}

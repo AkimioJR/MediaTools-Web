@@ -1,11 +1,19 @@
 import '@/styles/globals.css'
+import { useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 
 import { router } from '@/router'
 import { ToastProvider } from '@/components/toast-provider'
 import { ModalProvider } from '@/components/modal-provider'
+import { useAppStore } from '@/stores/useAppStore'
 
 function App() {
+  const { loadProviders } = useAppStore()
+
+  useEffect(() => {
+    loadProviders()
+  }, [])
+
   return (
     <>
       <ModalProvider>

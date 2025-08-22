@@ -1,4 +1,4 @@
-import type { StorageFileInfo, StorageProviderInterface } from '@/types/storage'
+import type { StorageFileInfo } from '@/types/storage'
 
 import { Card, CardBody } from '@heroui/card'
 import {
@@ -28,6 +28,7 @@ import {
   type SortOptionType,
 } from '@/ui/storage'
 import { CreateFolder } from '@/ui/storage/CreateFolder'
+import { useAppStore } from '@/stores/useAppStore'
 
 interface FileColumn {
   key: string
@@ -36,7 +37,6 @@ interface FileColumn {
 }
 
 interface LoadingStates {
-  providers: boolean
   files: boolean
   upload: boolean
   delete: boolean
@@ -69,9 +69,10 @@ const getShowHiddenFilesSetting = () => {
 const isWinRootPath = (path: string) => path.endsWith(':')
 
 export default function StoragePage() {
+  const { providers } = useAppStore()
+
   const [currentPath, setCurrentPath] = useState('')
   const [storageType, setStorageType] = useState('')
-  const [providers, setProviders] = useState<StorageProviderInterface[]>([])
   const [filesData, setFilesData] = useState<StorageFileInfo[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentSortMode, setCurrentSortMode] = useState<SortMode>('name_asc')
@@ -83,7 +84,6 @@ export default function StoragePage() {
   )
 
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({
-    providers: false,
     files: false,
     upload: false,
     delete: false,
@@ -126,21 +126,8 @@ export default function StoragePage() {
   }, [storageType, currentPath, needDetail])
 
   useEffect(() => {
-    const loadProviders = async () => {
-      await handleAsyncOperation(async () => {
-        const providerList =
-          await StorageService.ProviderService.getProviderList()
-
-        setProviders(providerList)
-
-        if (providerList.length > 0) {
-          setStorageType(providerList[0].storage_type)
-        }
-      }, 'providers')
-    }
-
-    loadProviders()
-  }, [])
+    setStorageType(providers[0]?.storage_type ?? '')
+  }, [providers])
 
   useEffect(() => {
     fetchFiles()

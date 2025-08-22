@@ -1,4 +1,4 @@
-import type { StorageProviderInterface, TransferType } from '@/types/storage'
+import type { TransferType } from '@/types/storage'
 import type { LibraryConfig } from '@/types/config'
 
 import { Card, CardBody } from '@heroui/card'
@@ -14,12 +14,11 @@ import { useEffect, useState } from 'react'
 import { TRANSFER_TYPE_OPTIONS } from '../constants'
 
 import { cn } from '@/utils/twUtils'
+import { useAppStore } from '@/stores/useAppStore'
 
 interface LibraryItemProps {
   lib: LibraryConfig & { id: string }
   idx: number
-  providers: StorageProviderInterface[]
-  loadingProviders: boolean
   onUpdate: (idx: number, updates: Partial<LibraryConfig>) => void
   onRemove: (idx: number) => void
   getAvailableTransferTypes: (
@@ -33,14 +32,14 @@ interface LibraryItemProps {
 export function LibraryItem({
   lib,
   idx,
-  providers,
-  loadingProviders,
   onUpdate,
   onRemove,
   getAvailableTransferTypes,
   validateAndFixTransferType,
   isDraggingOver = false,
 }: LibraryItemProps) {
+  const { providers } = useAppStore()
+
   const {
     attributes,
     listeners,
@@ -140,7 +139,7 @@ export function LibraryItem({
           />
 
           <Select
-            isDisabled={loadingProviders || providers.length === 0}
+            isDisabled={providers.length === 0}
             label="源存储类型"
             selectedKeys={lib.src_type ? [lib.src_type] : []}
             onSelectionChange={(keys) => {
@@ -166,7 +165,7 @@ export function LibraryItem({
           />
 
           <Select
-            isDisabled={loadingProviders || providers.length === 0}
+            isDisabled={providers.length === 0}
             label="目标存储类型"
             selectedKeys={lib.dst_type ? [lib.dst_type] : []}
             onSelectionChange={(keys) => {
