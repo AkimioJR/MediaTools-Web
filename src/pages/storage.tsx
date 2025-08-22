@@ -12,6 +12,7 @@ import {
 import { Spinner } from '@heroui/spinner'
 import { File, Folder } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useLocalStorage } from 'react-use'
 
 import { useDataSort } from '@/hooks/storage'
 import { StorageService } from '@/services/storage'
@@ -56,20 +57,14 @@ const TABLE_COLUMNS: FileColumn[] = [
   { key: 'actions', label: '操作' },
 ]
 
-const getShowHiddenFilesSetting = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_HIDDEN_FILES)
-
-    return saved === 'true'
-  } catch {
-    return false
-  }
-}
-
 const isWinRootPath = (path: string) => path.endsWith(':')
 
 export default function StoragePage() {
   const { providers } = useAppStore()
+  const [showHiddenFiles, setShowHiddenFiles] = useLocalStorage<boolean>(
+    STORAGE_KEYS.SHOW_HIDDEN_FILES,
+    false,
+  )
 
   const [currentPath, setCurrentPath] = useState('')
   const [storageType, setStorageType] = useState('')
@@ -79,9 +74,6 @@ export default function StoragePage() {
 
   const [showPathInput, setShowPathInput] = useState(false)
   const [pathInputValue, setPathInputValue] = useState('')
-  const [showHiddenFiles, setShowHiddenFiles] = useState(
-    getShowHiddenFilesSetting,
-  )
 
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({
     files: false,
@@ -136,7 +128,7 @@ export default function StoragePage() {
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEYS.SHOW_HIDDEN_FILES,
-      showHiddenFiles.toString(),
+      showHiddenFiles ? showHiddenFiles.toString() : 'false',
     )
   }, [showHiddenFiles])
 
@@ -352,9 +344,11 @@ export default function StoragePage() {
   const sortedFilesData = useDataSort(filesData, currentSortMode)
 
   const filteredItems = useMemo(() => {
-    return showHiddenFiles
-      ? sortedFilesData
-      : sortedFilesData.filter((file) => !file.name.startsWith('.'))
+    return sortedFilesData.filter((file) => {
+      if (showHiddenFiles) return true
+
+      return !file.name.startsWith('.')
+    })
   }, [showHiddenFiles, sortedFilesData])
 
   const handleSwitchSort = useCallback(
@@ -381,7 +375,7 @@ export default function StoragePage() {
             loadingUpload={loadingStates.upload}
             pathInputValue={pathInputValue}
             providers={providers}
-            showHiddenFiles={showHiddenFiles}
+            showHiddenFiles={showHiddenFiles ?? false}
             showPathInput={showPathInput}
             sortMode={currentSortMode}
             storageType={storageType}
@@ -392,7 +386,7 @@ export default function StoragePage() {
               setStorageType(key)
               setCurrentPath('')
             }}
-            onToggleHidden={setShowHiddenFiles}
+            onToggleHidden={() => setShowHiddenFiles(!showHiddenFiles)}
             onTogglePathInput={handleTogglePathInput}
             onToggleSort={handleSwitchSort}
             onUpload={handleUpload}

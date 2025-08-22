@@ -58,6 +58,7 @@
     "react-dom": "19.1.1",
     "react-hot-toast": "^2.5.2",
     "react-router-dom": "6.23.0",
+    "react-use": "^17.6.0",
     "tailwind-variants": "2.0.1",
     "tailwindcss": "4.1.11",
     "zustand": "^5.0.7"
