@@ -20,7 +20,8 @@ import {
 import { useState, useEffect } from 'react'
 import {
   DndContext,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -78,7 +79,10 @@ export function MediaSettings() {
   }, [libraries])
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
   )
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
