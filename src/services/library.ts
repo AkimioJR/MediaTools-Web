@@ -1,9 +1,4 @@
-import type {
-  StorageFileInfo,
-  StorageProvider,
-  TransferType,
-  MediaType,
-} from '@/types'
+import type { Task, StorageProvider, TransferType, MediaType } from '@/types'
 
 import api from './api'
 
@@ -24,7 +19,7 @@ export const LibraryService = {
     episode_str: string = '', // 空字符串表示不指定集数
     episode_offset: string = '', // 空字符串表示不指定集数偏移
     part: string = '', // 空字符串表示不指定分段
-  ): Promise<StorageFileInfo[]> {
+  ): Promise<Task> {
     const src_file = {
       storage_type: src_storage_type,
       path: src_path,
