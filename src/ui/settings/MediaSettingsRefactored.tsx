@@ -281,8 +281,6 @@ export function MediaSettings() {
                     idx={idx}
                     isDraggingOver={activeId !== null && activeId !== lib.id}
                     lib={lib}
-                    loadingProviders={false}
-                    providers={providers}
                     validateAndFixTransferType={validateAndFixTransferType}
                     onRemove={removeLibrary}
                     onUpdate={updateLibrary}
