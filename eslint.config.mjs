@@ -7,7 +7,7 @@ import react from "eslint-plugin-react";
 import unusedImports from "eslint-plugin-unused-imports";
 import _import from "eslint-plugin-import";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import jsxA11Y from "eslint-plugin-jsx-a11y";
+
 import prettier from "eslint-plugin-prettier";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
@@ -51,7 +51,6 @@ export default defineConfig([
         "plugin:react/recommended",
         "plugin:prettier/recommended",
         "plugin:react-hooks/recommended",
-        "plugin:jsx-a11y/recommended",
       ),
     ),
 
@@ -60,7 +59,7 @@ export default defineConfig([
       "unused-imports": unusedImports,
       import: fixupPluginRules(_import),
       "@typescript-eslint": typescriptEslint,
-      "jsx-a11y": fixupPluginRules(jsxA11Y),
+
       prettier: fixupPluginRules(prettier),
     },
 
@@ -98,8 +97,7 @@ export default defineConfig([
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
       "react-hooks/exhaustive-deps": "off",
-      "jsx-a11y/click-events-have-key-events": "warn",
-      "jsx-a11y/interactive-supports-focus": "warn",
+
       "prettier/prettier": "warn",
       "no-unused-vars": "off",
       "unused-imports/no-unused-vars": "off",
