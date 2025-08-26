@@ -5,7 +5,7 @@ import { useMemo, memo } from 'react'
 import { cn } from '@/utils'
 import { siteConfig } from '@/config/site'
 import { MenuIcon } from '@/components/icon'
-import { getMenuIconClass } from '@/utils/iconStyles'
+import { getMenuIconClass } from '@/config/site'
 
 interface SidebarMenusProps {
   onItemClick?: () => void
