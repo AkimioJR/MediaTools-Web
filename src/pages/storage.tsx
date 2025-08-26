@@ -359,10 +359,19 @@ export default function StoragePage() {
   )
 
   const handleManualSort = useCallback(async (file: StorageFileInfo) => {
-    await openModal(() => <ManualSortingForm file={file} />, {
-      title: '手动整理',
-      size: '3xl',
-    })
+    await openModal(
+      (close) => (
+        <ManualSortingForm
+          file={file}
+          onSubmitSuccess={() => close(undefined)}
+        />
+      ),
+      {
+        title: '手动整理',
+        size: '3xl',
+        subtitle: file.path,
+      },
+    )
   }, [])
 
   return (

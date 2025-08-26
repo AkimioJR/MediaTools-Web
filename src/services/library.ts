@@ -1,12 +1,12 @@
-import type { Task, StorageProvider, TransferType, MediaType } from '@/types'
+import type { Task, StorageType, TransferType, MediaType } from '@/types'
 
 import api from './api'
 
 export const LibraryService = {
   async ArchiveMediaManual(
-    src_storage_type: StorageProvider,
+    src_storage_type: StorageType,
     src_path: string,
-    dst_storage_type: StorageProvider,
+    dst_storage_type: StorageType,
     dst_path: string,
     transfer_type: TransferType,
     organize_by_type: boolean,
@@ -19,6 +19,7 @@ export const LibraryService = {
     episode_str: string = '', // 空字符串表示不指定集数
     episode_offset: string = '', // 空字符串表示不指定集数偏移
     part: string = '', // 空字符串表示不指定分段
+    episode_format: string = '', // 空字符串表示不指定集数格式
   ): Promise<Task> {
     const src_file = {
       storage_type: src_storage_type,
@@ -42,6 +43,7 @@ export const LibraryService = {
       episode_str,
       episode_offset,
       part,
+      episode_format,
     })
   },
 }

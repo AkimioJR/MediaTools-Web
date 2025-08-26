@@ -8,10 +8,11 @@ import { ModalProvider } from '@/components/modal-provider'
 import { useAppStore } from '@/stores/useAppStore'
 
 function App() {
-  const { loadProviders } = useAppStore()
+  const { loadProviders, loadMediaLibraries } = useAppStore()
 
   useEffect(() => {
     loadProviders()
+    loadMediaLibraries()
   }, [])
 
   return (

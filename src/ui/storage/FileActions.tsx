@@ -77,6 +77,8 @@ export const FileActions = React.memo(function FileActions({
       {Actions.map((action) => {
         if (file.type === 'Directory' && action.label === '下载') {
           return null
+        } else if (file.type !== 'File' && action.label === '识别媒体') {
+          return null
         }
 
         return (

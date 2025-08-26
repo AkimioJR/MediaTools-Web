@@ -17,6 +17,7 @@ type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl'
 
 export interface OpenModalOptions {
   title?: string
+  subtitle?: string
   size?: ModalSize
   confirmText?: string
   cancelText?: string
@@ -64,12 +65,15 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
       const resolver = resolverRef.current
 
       resolverRef.current = null
-      setModalState({
-        options: {
-          hideCloseButton: false,
-        },
-        renderer: null,
-      })
+      setTimeout(() => {
+        setModalState({
+          options: {
+            hideCloseButton: false,
+          },
+          renderer: null,
+        })
+      }, 200)
+
       if (resolver) resolver(result)
       onOpenChange()
     },
@@ -103,8 +107,17 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         onOpenChange={onOpenChange}
       >
         <ModalContent>
-          {options.title && <ModalHeader>{options.title}</ModalHeader>}
-          <ModalBody className="py-6">
+          <ModalHeader className="flex flex-col gap-1">
+            {options.title && (
+              <p className="text-lg font-bold">{options.title}</p>
+            )}
+            {options.subtitle && (
+              <p className="text-sm text-foreground-500 font-medium">
+                {options.subtitle}
+              </p>
+            )}
+          </ModalHeader>
+          <ModalBody className="pb-6 pt-0">
             {renderer ? renderer(closeModal) : null}
           </ModalBody>
         </ModalContent>

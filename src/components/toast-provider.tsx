@@ -51,5 +51,16 @@ export const handleApiError = (error: unknown, defaultMessage = '操作失败') 
 
 // Toast 提供者组件
 export function ToastProvider() {
-  return <Toaster position="top-center" reverseOrder={false} />
+  return (
+    <Toaster
+      position="top-center"
+      reverseOrder={false}
+      toastOptions={{
+        style: {
+          maxWidth: '500px',
+          whiteSpace: 'break-spaces',
+        },
+      }}
+    />
+  )
 }
