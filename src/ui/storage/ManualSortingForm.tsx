@@ -96,7 +96,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         />
         {isComboOpen && filteredOptions.length > 0 && (
           <div
-            className="absolute left-0 right-0 mt-1 z-51 shadow-medium bg-content1 rounded-medium border border-default-200"
+            className="absolute left-0 right-0 mt-1 z-51 shadow-medium bg-content1 rounded-medium"
             tabIndex={-1}
             onMouseDown={(e) => {
               e.preventDefault()
@@ -104,6 +104,8 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
             }}
           >
             <Listbox
+              aria-describedby="选择目的地路径"
+              aria-label="选择目的地路径"
               selectionMode="single"
               onAction={(key) => {
                 const chosen = String(key)

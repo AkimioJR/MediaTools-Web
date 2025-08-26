@@ -49,21 +49,21 @@ export function ScrapeSettings() {
         onSave={updateTmdbData}
       >
         <Input
+          defaultValue={tmdbConfig?.api_key || ''}
           label="TMDB API Key"
           placeholder="输入 TMDB API Key"
-          value={tmdbConfig?.api_key || ''}
           onValueChange={(value) => updateTmdbConfig({ api_key: value })}
         />
         <Input
+          defaultValue={tmdbConfig?.api_url || ''}
           label="TMDB API URL"
           placeholder="输入 TMDB API URL"
-          value={tmdbConfig?.api_url || ''}
           onValueChange={(value) => updateTmdbConfig({ api_url: value })}
         />
         <Input
+          defaultValue={tmdbConfig?.image_url || ''}
           label="TMDB 图片 URL"
           placeholder="输入 TMDB 图片 URL"
-          value={tmdbConfig?.image_url || ''}
           onValueChange={(value) => updateTmdbConfig({ image_url: value })}
         />
         <div className={SETTINGS_STYLES.grid}>
@@ -121,15 +121,15 @@ export function ScrapeSettings() {
         onSave={updateFanartData}
       >
         <Input
+          defaultValue={fanartConfig?.api_key || ''}
           label="Fanart API Key"
           placeholder="输入 Fanart API Key"
-          value={fanartConfig?.api_key || ''}
           onValueChange={(value) => updateFanartConfig({ api_key: value })}
         />
         <Input
+          defaultValue={fanartConfig?.api_url || ''}
           label="Fanart API URL"
           placeholder="输入 Fanart API URL"
-          value={fanartConfig?.api_url || ''}
           onValueChange={(value) => updateFanartConfig({ api_url: value })}
         />
         <Select

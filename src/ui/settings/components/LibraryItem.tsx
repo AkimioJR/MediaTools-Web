@@ -129,8 +129,8 @@ export function LibraryItem({
           </div>
 
           <Input
+            defaultValue={nameValue}
             label="名称"
-            value={nameValue}
             onCompositionEnd={(e) =>
               handleCompositionEnd('name')(e.currentTarget.value)
             }
@@ -155,8 +155,8 @@ export function LibraryItem({
           </Select>
 
           <Input
+            defaultValue={srcPathValue}
             label="源路径"
-            value={srcPathValue}
             onCompositionEnd={(e) =>
               handleCompositionEnd('src_path')(e.currentTarget.value)
             }
@@ -181,8 +181,8 @@ export function LibraryItem({
           </Select>
 
           <Input
+            defaultValue={dstPathValue}
             label="目标路径"
-            value={dstPathValue}
             onCompositionEnd={(e) =>
               handleCompositionEnd('dst_path')(e.currentTarget.value)
             }

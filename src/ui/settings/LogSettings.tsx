@@ -69,9 +69,9 @@ export function LogSettings() {
       </div>
 
       <Input
+        defaultValue={logConfig.file_dir || ''}
         label="日志文件目录"
         placeholder="输入日志文件目录路径"
-        value={logConfig.file_dir || ''}
         onValueChange={(value) => updateConfig({ file_dir: value })}
       />
     </BaseSettingsCard>

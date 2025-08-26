@@ -43,7 +43,6 @@ export function MediaSettings() {
     setCustomWordConfig,
     libraries,
     setLibraries,
-    loadLibrariesData,
     updateLibrariesData,
   } = useMediaConfig()
 
@@ -55,7 +54,6 @@ export function MediaSettings() {
 
   useSettingsLoader({ loadData: loadFormatData })
   useSettingsLoader({ loadData: loadCustomWordData })
-  useSettingsLoader({ loadData: loadLibrariesData })
 
   const generateId = () =>
     `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`

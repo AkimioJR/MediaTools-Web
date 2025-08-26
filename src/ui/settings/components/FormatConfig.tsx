@@ -18,15 +18,15 @@ export function FormatConfig({
     <>
       <div className="space-y-6">
         <Textarea
+          defaultValue={formatConfig?.movie || ''}
           label="电影格式"
           placeholder="例如: {title} ({year})"
-          value={formatConfig?.movie || ''}
           onValueChange={onUpdateMovie}
         />
         <Textarea
+          defaultValue={formatConfig?.tv || ''}
           label="电视剧格式"
           placeholder="例如: {title} S{season:02d}E{episode:02d}"
-          value={formatConfig?.tv || ''}
           onValueChange={onUpdateTV}
         />
       </div>

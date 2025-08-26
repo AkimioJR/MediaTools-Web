@@ -35,6 +35,7 @@ export function CustomWordConfig({
       <div className="flex items-start gap-2">
         <Textarea
           className="flex-1"
+          defaultValue={toMultilineValue(customWordConfig?.identify_word)}
           label={
             <div className="flex items-center gap-2">
               <p>自定义识别词</p>
@@ -57,26 +58,25 @@ export function CustomWordConfig({
           maxRows={12}
           minRows={8}
           placeholder="输入自定义识别词，用逗号分隔"
-          value={toMultilineValue(customWordConfig?.identify_word)}
           onValueChange={(value) => onUpdateField('identify_word', value)}
         />
       </div>
 
       <Textarea
+        defaultValue={toMultilineValue(customWordConfig?.customization)}
         description="用于电影/电视剧重命名的自定义词（每行一个，支持使用正则表达式，注意转义）"
         label="自定义词条"
         maxRows={12}
         minRows={8}
         placeholder="输入自定义占位词，用逗号分隔"
-        value={toMultilineValue(customWordConfig?.customization)}
         onValueChange={(value) => onUpdateField('customization', value)}
       />
 
       <Textarea
+        defaultValue={toMultilineValue(customWordConfig?.exclude_words)}
         description="路径中包含这些词的将不会自动转移（每行一个）"
         label="媒体库过滤词"
         placeholder="输入自定义排除词，用逗号分隔"
-        value={toMultilineValue(customWordConfig?.exclude_words)}
         onValueChange={(value) => onUpdateField('exclude_words', value)}
       />
     </>

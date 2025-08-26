@@ -105,9 +105,9 @@ export function Toolbar({
           {showPathInput ? (
             <Input
               className="text-xs"
+              defaultValue={pathInputValue}
               placeholder="请输入路径"
               size="sm"
-              value={pathInputValue}
               onKeyDown={(e) => {
                 if ((e as any).key === 'Enter') {
                   onTogglePathInput()

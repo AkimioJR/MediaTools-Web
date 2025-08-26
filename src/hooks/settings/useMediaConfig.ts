@@ -8,26 +8,15 @@ import { useState, useCallback } from 'react'
 
 import { configService } from '@/services/config'
 import { showSuccess, handleApiError } from '@/utils/message'
+import { useAppStore } from '@/stores/useAppStore'
 
 export const useMediaConfig = () => {
-  const [libraries, setLibraries] = useState<LibraryConfig[]>([])
+  const { mediaLibraries } = useAppStore()
+  const [libraries, setLibraries] = useState<LibraryConfig[]>(mediaLibraries)
   const [formatConfig, setFormatConfig] = useState<FormatConfig | null>(null)
   const [customWordConfig, setCustomWordConfig] =
     useState<CustomWordConfig | null>(null)
   const [loading, setLoading] = useState(false)
-
-  const loadLibrariesData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const config = await configService.getMediaLibrariesConfig()
-
-      setLibraries(config)
-    } catch (error) {
-      handleApiError(error, '加载媒体库配置失败')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
 
   const loadFormatData = useCallback(async () => {
     setLoading(true)
@@ -56,12 +45,8 @@ export const useMediaConfig = () => {
   }, [])
 
   const loadAllData = useCallback(async () => {
-    await Promise.all([
-      loadLibrariesData(),
-      loadFormatData(),
-      loadCustomWordData(),
-    ])
-  }, [loadLibrariesData, loadFormatData, loadCustomWordData])
+    await Promise.all([loadFormatData(), loadCustomWordData()])
+  }, [loadFormatData, loadCustomWordData])
 
   const updateLibrariesData = useCallback(async () => {
     setLoading(true)
@@ -124,7 +109,6 @@ export const useMediaConfig = () => {
     customWordConfig,
     loading,
 
-    loadLibrariesData,
     loadFormatData,
     loadCustomWordData,
     loadAllData,
