@@ -45,6 +45,7 @@
     "@heroui/theme": "2.4.20",
     "@heroui/tooltip": "^2.2.21",
     "@heroui/use-theme": "2.1.10",
+    "@react-types/shared": "^3.32.0",
     "@tailwindcss/postcss": "4.1.11",
     "@tailwindcss/vite": "4.1.11",
     "axios": "^1.11.0",
