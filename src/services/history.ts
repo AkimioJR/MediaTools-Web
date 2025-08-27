@@ -12,7 +12,8 @@ export const HistoryService = {
       path: string | undefined, // 路径，模糊匹配
       transfer_type: TransferType | undefined, // 传输类型
       status: boolean | undefined, // 传输状态，true 成功，false 失败
-      count: number | undefined = 30, // 返回记录数，默认 30
+      count: number = 50, // 返回记录数，默认 50
+      page: number = 1, // 页码，默认 1
     ): Promise<MediaTransferHistory[]> {
       var params: Record<string, any> = {}
       if (id !== undefined) {
@@ -38,6 +39,9 @@ export const HistoryService = {
         }
         if (count !== undefined) {
           params['count'] = count
+        }
+        if (page !== undefined) {
+          params['page'] = page
         }
       }
       return await api.get('/history/media', { params })
