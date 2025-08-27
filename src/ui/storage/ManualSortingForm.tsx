@@ -199,7 +199,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         name="min_file_size"
         size="sm"
       /> */}
-      <div className="col-span-2 flex gap-10">
+      <div className="col-span-2 flex flex-wrap gap-3 sm:gap-10">
         <Switch name="scrape" size="sm" value="true">
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">刮削元数据</p>
@@ -208,13 +208,23 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
             </p>
           </div>
         </Switch>
-        <Switch name="organize_by_type" size="sm" value="true">
+        <Switch
+          className="sm:flex-none"
+          name="organize_by_type"
+          size="sm"
+          value="true"
+        >
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">是否按类型整理</p>
             <p className="text-foreground-500 text-tiny">只整理同一类型文件</p>
           </div>
         </Switch>
-        <Switch name="organize_by_category" size="sm" value="true">
+        <Switch
+          className="sm:flex-none"
+          name="organize_by_category"
+          size="sm"
+          value="true"
+        >
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">是否按分类整理</p>
             <p className="text-foreground-500 text-tiny">只整理同一分类文件</p>
