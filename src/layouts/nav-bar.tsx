@@ -10,6 +10,7 @@ import { MediaRecognitionDialog } from '@/components/media-recognition-dialog'
 import { useModal } from '@/components/modal-provider'
 import { useAppStore } from '@/stores/useAppStore'
 import { siteConfig } from '@/config/site'
+import { TaskList } from '@/ui/nav_bar/TaskList'
 
 export function NavBar() {
   const { switchSidebar, isOpenSidebar, switchMobileDrawer } = useAppStore()
@@ -67,6 +68,9 @@ export function NavBar() {
         </NavbarItem>
       </NavbarBrand>
       <NavbarContent justify="end">
+        <NavbarItem>
+          <TaskList />
+        </NavbarItem>
         <NavbarItem>
           <Button
             isIconOnly
