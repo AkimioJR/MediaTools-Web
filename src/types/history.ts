@@ -11,5 +11,5 @@ export interface MediaTransferHistory {
   transfer_type: TransferType // 传输类型
   status: boolean // true 成功，false 失败
   message: string // 失败时的错误信息
-  media_item: MediaItem // 关联的媒体项
+  item: MediaItem // 关联的媒体项
 }
