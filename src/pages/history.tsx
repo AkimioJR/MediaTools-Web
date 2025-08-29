@@ -129,7 +129,7 @@ export default function HistoryPage() {
                           return (
                             <TableCell className="hidden sm:table-cell whitespace-nowrap">
                               <span className="text-foreground-500">
-                                {row.media_item.title}
+                                {row.item.title}
                               </span>
                             </TableCell>
                           )
