@@ -1,7 +1,7 @@
 import type { StorageFileInfo } from '@/types/storage'
 import type { MediaType, StorageType, TransferType } from '@/types'
 
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import { LibraryService } from '@/services/library'
 import { handleApiError, showSuccess } from '@/utils/message'
@@ -14,10 +14,12 @@ type UseManualSortParams = {
 
 export function useManualSort(params: UseManualSortParams) {
   const { file, destinationValue, onSubmitSuccess } = params
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
+      setIsLoading(true)
 
       const entries = Object.fromEntries(
         new FormData(e.currentTarget),
@@ -82,10 +84,12 @@ export function useManualSort(params: UseManualSortParams) {
         onSubmitSuccess()
       } catch (error) {
         handleApiError('加入整理队列失败:' + error)
+      } finally {
+        setIsLoading(false)
       }
     },
     [file, destinationValue, onSubmitSuccess],
   )
 
-  return { handleSubmit }
+  return { handleSubmit, isLoading }
 }

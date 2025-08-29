@@ -72,7 +72,7 @@ export const TaskList: FC = () => {
   }, [])
 
   return (
-    <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
+    <Dropdown className="" isOpen={isOpen} onOpenChange={setIsOpen}>
       <DropdownTrigger>
         <Button isIconOnly aria-label="转移任务列表" size="sm" variant="light">
           <HeaderIcon icon={ListVideo} />
@@ -80,7 +80,7 @@ export const TaskList: FC = () => {
       </DropdownTrigger>
       <DropdownMenu
         aria-label="转移任务列表"
-        emptyContent={isLoading ? '加载中…' : '暂无任务'}
+        emptyContent={isLoading ? '加载中…' : '暂无进行中的任务'}
         items={tasks}
       >
         {(task: Task) => (

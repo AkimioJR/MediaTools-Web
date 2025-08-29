@@ -42,7 +42,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
     return mediaLibraries.map((item) => item.dst_path)
   }, [mediaLibraries])
 
-  const { handleSubmit } = useManualSort({
+  const { handleSubmit, isLoading } = useManualSort({
     file,
     destinationValue,
     onSubmitSuccess,
@@ -234,6 +234,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
       <div className="col-span-2 flex justify-end gap-4">
         <Button
           color="success"
+          isLoading={isLoading}
           startContent={<ButtonIcon icon={Plus} />}
           type="submit"
           variant="shadow"
