@@ -11,7 +11,7 @@ import { showSuccess, handleApiError } from '@/utils/message'
 import { useAppStore } from '@/stores/useAppStore'
 
 export const useMediaConfig = () => {
-  const { mediaLibraries } = useAppStore()
+  const { mediaLibraries, loadMediaLibraries } = useAppStore()
   const [libraries, setLibraries] = useState<LibraryConfig[]>(mediaLibraries)
   const [formatConfig, setFormatConfig] = useState<FormatConfig | null>(null)
   const [customWordConfig, setCustomWordConfig] =
@@ -55,6 +55,7 @@ export const useMediaConfig = () => {
         await configService.updateMediaLibrariesConfig(libraries)
 
       setLibraries(updatedConfig)
+      loadMediaLibraries()
       showSuccess('媒体库配置保存成功')
 
       return updatedConfig
@@ -63,7 +64,7 @@ export const useMediaConfig = () => {
     } finally {
       setLoading(false)
     }
-  }, [libraries])
+  }, [libraries, loadMediaLibraries])
 
   const updateFormatData = useCallback(async () => {
     if (!formatConfig) return

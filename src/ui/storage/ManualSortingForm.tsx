@@ -50,6 +50,10 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
     onSubmitSuccess,
   })
 
+  const currentMediaLibrary = useMemo(() => {
+    return mediaLibraries.find((item) => item.dst_path === destinationValue)
+  }, [mediaLibraries, destinationValue])
+
   return (
     <Form
       autoCapitalize="off"
@@ -86,6 +90,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
           description="整理的目的地路径，留空将自动匹配"
           label="目的地路径"
           name="dst_path"
+          placeholder=" "
           size="sm"
           value={destinationValue}
           onBlur={() => {
@@ -119,9 +124,6 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
 
                 setDestinationValue(chosen)
                 setIsComboOpen(false)
-                requestAnimationFrame(() => {
-                  inputRef.current?.focus({ preventScroll: true })
-                })
               }}
             >
               {filteredOptions.map((opt) => (
@@ -234,7 +236,12 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         size="sm"
       /> */}
       <div className="col-span-2 flex flex-wrap gap-3 sm:gap-10">
-        <Switch name="scrape" size="sm" value="true">
+        <Switch
+          isSelected={!!currentMediaLibrary?.scrape}
+          name="scrape"
+          size="sm"
+          value="true"
+        >
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">刮削元数据</p>
             <p className="text-foreground-500 text-tiny">
@@ -244,6 +251,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         </Switch>
         <Switch
           className="sm:flex-none"
+          isSelected={!!currentMediaLibrary?.organize_by_type}
           name="organize_by_type"
           size="sm"
           value="true"
@@ -255,6 +263,7 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         </Switch>
         <Switch
           className="sm:flex-none"
+          isSelected={!!currentMediaLibrary?.organize_by_category}
           name="organize_by_category"
           size="sm"
           value="true"

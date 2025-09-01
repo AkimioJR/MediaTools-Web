@@ -228,13 +228,13 @@ export function LibraryItem({
             >
               开启刮削
             </Checkbox>
-            <Checkbox
+            {/* <Checkbox
               isSelected={lib.notify}
               size="md"
               onValueChange={(val) => updateField('notify', val)}
             >
               入库通知
-            </Checkbox>
+            </Checkbox> */}
           </div>
         </CardBody>
       </Card>
