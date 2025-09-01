@@ -6,16 +6,18 @@ import { Button } from '@heroui/button'
 import { Form } from '@heroui/form'
 import { Input } from '@heroui/input'
 import { Listbox, ListboxItem } from '@heroui/listbox'
+import { Tooltip } from '@heroui/tooltip'
 import { Select, SelectItem } from '@heroui/select'
 import { Switch } from '@heroui/switch'
-import { Plus } from 'lucide-react'
+import { Info, Plus } from 'lucide-react'
 
 import {
   MEDIA_TYPE_OPTIONS,
-  MAX_EPISODE_NUMBER,
+  // MAX_EPISODE_NUMBER,
   MAX_SEASON_NUMBER,
 } from './constants'
 
+import FormattedText from '@/components/FormattedText'
 import { TRANSFER_TYPE_OPTIONS } from '@/ui/settings/constants'
 import { useAppStore } from '@/stores/useAppStore'
 import { ButtonIcon } from '@/components/icon'
@@ -49,7 +51,12 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
   })
 
   return (
-    <Form className="grid grid-cols-2 gap-4" onSubmit={handleSubmit}>
+    <Form
+      autoCapitalize="off"
+      autoComplete="off"
+      className="grid grid-cols-2 gap-4"
+      onSubmit={handleSubmit}
+    >
       <Select
         defaultSelectedKeys={[providers[0].storage_type]}
         label="目的存储"
@@ -135,13 +142,14 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         }}
       >
         {MEDIA_TYPE_OPTIONS.map((option) => (
-          <SelectItem key={option.value} textValue={option.value}>
+          <SelectItem key={option.value} textValue={option.label}>
             {option.label}
           </SelectItem>
         ))}
       </Select>
       <Input
         description="按名称查询媒体编号，留空自动识别"
+        isDisabled={mediaType === 'UnknownMediaType'}
         label="TheMovieDb编号"
         name="tmdb_id"
         size="sm"
@@ -149,28 +157,27 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
 
       {mediaType === 'TV' && (
         <>
-          <Input
+          {/* <Input
             className="col-span-1"
             description="指定剧集组"
             label="剧集组编号"
             name="season_number"
             size="sm"
-          />
+          /> */}
           <div className="grid grid-cols-2 gap-4">
-            <Select description="第几季" label="季" name="season">
+            <Select description="第几季" label="季" name="season" size="sm">
               {Array.from({ length: MAX_SEASON_NUMBER }, (_, i) => (
                 <SelectItem key={i + 1} textValue={i + 1 + ''}>
                   {i + 1}
                 </SelectItem>
               ))}
             </Select>
-            <Select description="第几集" label="集" name="episode_str">
-              {Array.from({ length: MAX_EPISODE_NUMBER }, (_, i) => (
-                <SelectItem key={i + 1} textValue={i + 1 + ''}>
-                  {i + 1}
-                </SelectItem>
-              ))}
-            </Select>
+            <Input
+              description="第几集"
+              label="集"
+              name="episode_str"
+              size="sm"
+            />
           </div>
           <Input
             description="使用定位文件名中的集数部分以辅助识别"
@@ -179,7 +186,34 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
             size="sm"
           />
           <Input
-            description="集数偏移运算，如-10或EP*2"
+            description={
+              <div className="flex items-center gap-2">
+                <p>自定义识别词</p>
+                <Tooltip
+                  showArrow
+                  closeDelay={0}
+                  content={
+                    <div className="text-xs space-y-1 max-w-xs p-1">
+                      <FormattedText
+                        className="text-sm text-muted-foreground"
+                        text={`
+                        目前支持的集偏移语法：
+                        1. EP+10（加法）
+                        2. EP-10（减法）
+                        3. 3*EP（乘法）
+                        4. 5*EP+10（乘法+加法/减法）
+
+                        需确保语法顺序,如10+EP、EP*2均为错误语法
+                      `}
+                      />
+                    </div>
+                  }
+                  placement="right"
+                >
+                  <Info className="w-4 h-4 text-foreground-500 cursor-default" />
+                </Tooltip>
+              </div>
+            }
             label="集数偏移"
             name="episode_offset"
             size="sm"
