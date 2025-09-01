@@ -1,7 +1,7 @@
 import type { StorageFileInfo } from '@/types/storage'
 import type { MediaType } from '@/types'
 
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { Button } from '@heroui/button'
 import { Form } from '@heroui/form'
 import { Input } from '@heroui/input'
@@ -37,6 +37,13 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
   )
   const [isComboOpen, setIsComboOpen] = useState(false)
   const [mediaType, setMediaType] = useState(MEDIA_TYPE_OPTIONS[0].value)
+
+  const [switchStates, setSwitchStates] = useState({
+    scrape: false,
+    organizeByType: false,
+    organizeByCategory: false,
+  })
+
   const containerRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -53,6 +60,28 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
   const currentMediaLibrary = useMemo(() => {
     return mediaLibraries.find((item) => item.dst_path === destinationValue)
   }, [mediaLibraries, destinationValue])
+
+  // 监听 currentMediaLibrary 变化，更新 Switch 状态
+  useEffect(() => {
+    if (currentMediaLibrary) {
+      setSwitchStates({
+        scrape: !!currentMediaLibrary.scrape,
+        organizeByType: !!currentMediaLibrary.organize_by_type,
+        organizeByCategory: !!currentMediaLibrary.organize_by_category,
+      })
+    }
+  }, [currentMediaLibrary])
+
+  // 创建更新单个 Switch 状态的函数
+  const updateSwitchState = (
+    key: keyof typeof switchStates,
+    value: boolean,
+  ) => {
+    setSwitchStates((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
+  }
 
   return (
     <Form
@@ -237,10 +266,11 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
       /> */}
       <div className="col-span-2 flex flex-wrap gap-3 sm:gap-10">
         <Switch
-          isSelected={!!currentMediaLibrary?.scrape}
+          isSelected={switchStates.scrape}
           name="scrape"
           size="sm"
           value="true"
+          onValueChange={(value) => updateSwitchState('scrape', value)}
         >
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">刮削元数据</p>
@@ -251,10 +281,11 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         </Switch>
         <Switch
           className="sm:flex-none"
-          isSelected={!!currentMediaLibrary?.organize_by_type}
+          isSelected={switchStates.organizeByType}
           name="organize_by_type"
           size="sm"
           value="true"
+          onValueChange={(value) => updateSwitchState('organizeByType', value)}
         >
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">是否按类型整理</p>
@@ -263,10 +294,13 @@ export const ManualSortingForm = (props: ManualSortingFormProps) => {
         </Switch>
         <Switch
           className="sm:flex-none"
-          isSelected={!!currentMediaLibrary?.organize_by_category}
+          isSelected={switchStates.organizeByCategory}
           name="organize_by_category"
           size="sm"
           value="true"
+          onValueChange={(value) =>
+            updateSwitchState('organizeByCategory', value)
+          }
         >
           <div className="flex flex-col gap-1">
             <p className="text-foreground-500">是否按分类整理</p>
