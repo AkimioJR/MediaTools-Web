@@ -9,7 +9,7 @@ export default function DetailModal({ row }: DetailModalProps) {
   const statusText = row.status ? '成功' : '失败'
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[75vh] overflow-y-auto">
       <Section title="媒体信息">
         <div className="divide-y divide-default-200">
           <Field label="名称">
