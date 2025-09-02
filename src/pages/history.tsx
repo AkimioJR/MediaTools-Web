@@ -1,6 +1,7 @@
 import type { MediaTransferHistory } from '@/types'
 
 import { Card, CardBody } from '@heroui/card'
+import { Info } from 'lucide-react'
 import {
   Table,
   TableHeader,
@@ -14,9 +15,13 @@ import { Select, SelectItem } from '@heroui/select'
 import { Pagination } from '@heroui/pagination'
 import { Spinner } from '@heroui/spinner'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Button } from '@heroui/button'
 
 import { HistoryService } from '@/services/history'
 import { showError } from '@/components/toast-provider'
+import { Icon } from '@/components/icon'
+import { useModal } from '@/components/modal-provider'
+import DetailModal from '@/ui/history/DetailModal'
 
 interface ColumnDef {
   key: string
@@ -25,27 +30,27 @@ interface ColumnDef {
 }
 
 const TABLE_COLUMNS: ColumnDef[] = [
-  { key: 'name', label: '名称', className: 'hidden sm:table-cell' },
-  { key: 'path', label: '路径', className: '' },
+  { key: 'name', label: '名称', className: '' },
+  { key: 'path', label: '路径', className: 'hidden sm:table-cell' },
   { key: 'type', label: '类型', className: 'hidden sm:table-cell' },
-  { key: 'status', label: '状态', className: 'w-24 sm:w-28 text-center' },
+  {
+    key: 'status',
+    label: '状态',
+    className: 'w-24 hidden sm:table-cell',
+  },
   {
     key: 'message',
     label: '消息',
-    className: 'hidden sm:table-cell text-center',
+    className: 'hidden sm:table-cell',
+  },
+  {
+    key: 'detail',
+    label: '详情',
+    className: 'sm:hidden',
   },
 ]
 
 const PAGE_SIZES = [20, 50, 100]
-
-function formatDate(value?: string): string {
-  if (!value) return ''
-  try {
-    return new Date(value).toLocaleString('zh-CN')
-  } catch {
-    return value
-  }
-}
 
 function truncate(text: string, max = 48): string {
   if (text.length <= max) return text
@@ -58,7 +63,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<number>(50)
-
+  const { openModal } = useModal()
   const canNext = items.length >= pageSize
   const totalPages = Math.max(1, page + (canNext ? 1 : 0))
 
@@ -89,14 +94,24 @@ export default function HistoryPage() {
     [],
   )
 
+  const handleOpenDetailModal = useCallback(
+    (row: MediaTransferHistory) => {
+      openModal(
+        (close) => <DetailModal row={row} onClose={() => close(undefined)} />,
+        {
+          title: '转移详情',
+        },
+      )
+    },
+    [openModal],
+  )
+
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
-      {/* 工具栏：保留空位 */}
       <Card radius="lg" shadow="sm">
         <CardBody className="p-3 sm:p-4">工具栏</CardBody>
       </Card>
 
-      {/* 列表 */}
       <Card radius="lg" shadow="sm">
         <CardBody className="p-0">
           <div className="overflow-x-auto">
@@ -105,7 +120,7 @@ export default function HistoryPage() {
               aria-label="转移历史列表"
               classNames={{
                 th: 'bg-default-100 text-xs sm:text-sm',
-                td: 'py-2 sm:py-3 text-xs sm:text-sm align-top',
+                td: 'py-2 sm:py-3 text-xs sm:text-sm align-middle',
               }}
             >
               <TableHeader columns={TABLE_COLUMNS}>
@@ -127,27 +142,31 @@ export default function HistoryPage() {
                       switch (columnKey) {
                         case 'name':
                           return (
-                            <TableCell className="hidden sm:table-cell whitespace-nowrap">
-                              <span className="text-foreground-500">
-                                {row.item.title}
-                              </span>
+                            <TableCell className="max-w-[24rem]">
+                              <span className="">{row.item.title}</span>
+                              <Chip
+                                className="sm:hidden ml-2"
+                                color={row.status ? 'success' : 'danger'}
+                                size="sm"
+                                variant="flat"
+                              >
+                                {row.status ? '成功' : '失败'}
+                              </Chip>
                             </TableCell>
                           )
                         case 'path': {
-                          const src = `${row.src_type}:${row.src_path}`
-                          const dest = `${row.dest_type}:${row.dest_path}`
+                          const src = `${row.src_path}`
+                          const dest = `${row.dst_path}`
 
                           return (
-                            <TableCell>
+                            <TableCell className="max-w-[24rem] hidden sm:table-cell">
                               <div className="flex flex-col">
                                 <div className="font-medium truncate">
-                                  {truncate(src, 56)}
+                                  {src}
                                 </div>
-                                <div className="text-foreground-500 truncate">
-                                  → {truncate(dest, 56)}
-                                </div>
-                                <div className="sm:hidden text-foreground-500 text-[11px] mt-1">
-                                  {formatDate(row.updated_at)}
+                                <div className="text-foreground-500">to</div>
+                                <div className="font-medium truncate">
+                                  {dest}
                                 </div>
                               </div>
                             </TableCell>
@@ -156,14 +175,12 @@ export default function HistoryPage() {
                         case 'type':
                           return (
                             <TableCell className="hidden sm:table-cell">
-                              <span className="uppercase tracking-wide text-xs">
-                                {row.transfer_type}
-                              </span>
+                              <span className="">{row.transfer_type}</span>
                             </TableCell>
                           )
                         case 'status':
                           return (
-                            <TableCell className="w-24 sm:w-28">
+                            <TableCell className="w-24 hidden sm:table-cell">
                               <Chip
                                 color={row.status ? 'success' : 'danger'}
                                 size="sm"
@@ -173,9 +190,24 @@ export default function HistoryPage() {
                               </Chip>
                             </TableCell>
                           )
+                        case 'detail':
+                          return (
+                            <TableCell className="sm:hidden">
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                                onPress={() => {
+                                  handleOpenDetailModal(row)
+                                }}
+                              >
+                                <Icon icon={Info} />
+                              </Button>
+                            </TableCell>
+                          )
                         case 'message':
                           return (
-                            <TableCell className="hidden sm:table-cell max-w-[24rem]">
+                            <TableCell className="max-w-[24rem] hidden sm:table-cell">
                               <span className="text-foreground-500">
                                 {row.message ? truncate(row.message, 120) : ''}
                               </span>
