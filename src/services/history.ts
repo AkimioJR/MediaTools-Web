@@ -50,5 +50,13 @@ export const HistoryService = {
 
       return await api.get('/history/media', { params })
     },
+
+    async GetMediaTransferHistories(id: number): Promise<MediaTransferHistory> {
+      return await api.get('/history/media', { params: { id } })
+    },
+
+    async DeleteMediaTransferHistory(id: number): Promise<void> {
+      return await api.delete(`/history/media`, { params: { id } })
+    },
   },
 }
