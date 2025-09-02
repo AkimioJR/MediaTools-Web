@@ -7,9 +7,10 @@ export interface ApiResponse<T> {
   message: string
   data: T
 }
+const baseURL = import.meta.env.VITE_API_URL || '/api'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL,
   timeout: 1000 * 20,
 })
 
