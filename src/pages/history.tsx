@@ -39,24 +39,13 @@ const TABLE_COLUMNS: ColumnDef[] = [
     className: 'w-24 hidden sm:table-cell',
   },
   {
-    key: 'message',
-    label: '消息',
-    className: 'hidden sm:table-cell',
-  },
-  {
     key: 'detail',
     label: '详情',
-    className: 'sm:hidden',
+    className: '',
   },
 ]
 
 const PAGE_SIZES = [20, 50, 100]
-
-function truncate(text: string, max = 48): string {
-  if (text.length <= max) return text
-
-  return text.slice(0, max - 1) + '…'
-}
 
 export default function HistoryPage() {
   const [items, setItems] = useState<MediaTransferHistory[]>([])
@@ -100,6 +89,7 @@ export default function HistoryPage() {
         (close) => <DetailModal row={row} onClose={() => close(undefined)} />,
         {
           title: '转移详情',
+          size: window.innerWidth > 768 ? '3xl' : undefined,
         },
       )
     },
@@ -192,7 +182,7 @@ export default function HistoryPage() {
                           )
                         case 'detail':
                           return (
-                            <TableCell className="sm:hidden">
+                            <TableCell className="">
                               <Button
                                 isIconOnly
                                 size="sm"
@@ -203,14 +193,6 @@ export default function HistoryPage() {
                               >
                                 <Icon icon={Info} />
                               </Button>
-                            </TableCell>
-                          )
-                        case 'message':
-                          return (
-                            <TableCell className="max-w-[24rem] hidden sm:table-cell">
-                              <span className="text-foreground-500">
-                                {row.message ? truncate(row.message, 120) : ''}
-                              </span>
                             </TableCell>
                           )
                         default:
