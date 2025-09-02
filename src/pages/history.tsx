@@ -60,7 +60,7 @@ export default function HistoryPage() {
     setLoading(true)
     try {
       const data =
-        await HistoryService.MediaHistoryService.GetMediaTransferHistory({
+        await HistoryService.MediaHistoryService.QueryMediaTransferHistories({
           page,
           count: pageSize,
         })

@@ -15,7 +15,7 @@ export interface MediaHistoryQueryOptions {
 
 export const HistoryService = {
   MediaHistoryService: {
-    async GetMediaTransferHistory(
+    async QueryMediaTransferHistories(
       options: MediaHistoryQueryOptions = {},
     ): Promise<MediaTransferHistory[]> {
       const {
