@@ -9,6 +9,7 @@ import { Link } from '@heroui/link'
 import { TMDBService } from '@/services/tmdb'
 import { CustomTabs, type TabItem } from '@/components/custom-tabs'
 import LabelValue from '@/components/LabelValue'
+import { cn } from '@/utils'
 
 export interface MediaDetailCardProps {
   item: MediaItem
@@ -22,10 +23,12 @@ const CachedImage = React.memo(function CachedImage({
   src,
   alt,
   isLoading,
+  imgClassName,
 }: {
   src: string
   alt: string
   isLoading: boolean
+  imgClassName?: string
 }) {
   const [imageError, setImageError] = useState(false)
 
@@ -54,7 +57,7 @@ const CachedImage = React.memo(function CachedImage({
         isBlurred
         isZoomed
         alt={alt}
-        className="full"
+        className={cn('full', imgClassName)}
         isLoading={isLoading}
         radius="lg"
         src={src}
@@ -338,6 +341,7 @@ export default function MediaDetailCard({
             <div className="w-32 h-48 sm:w-40 sm:h-60 md:w-48 md:h-72 relative overflow-visible">
               <CachedImage
                 alt={`${item.title} poster`}
+                imgClassName="w-32 h-48 sm:w-40 sm:h-60 md:w-48 md:h-72"
                 isLoading={posterLoading}
                 src={posterUrl}
               />

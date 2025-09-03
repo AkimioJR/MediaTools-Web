@@ -409,13 +409,14 @@ export default function StoragePage() {
           <div className="overflow-x-auto">
             <Table
               hideHeader
-              isStriped
+              isVirtualized
               removeWrapper
               aria-label="文件列表"
               classNames={{
                 th: 'bg-default-100 text-xs sm:text-sm',
                 td: 'py-2 sm:py-3 text-xs sm:text-sm',
               }}
+              maxTableHeight={650}
             >
               <TableHeader columns={TABLE_COLUMNS}>
                 {(column) => (
