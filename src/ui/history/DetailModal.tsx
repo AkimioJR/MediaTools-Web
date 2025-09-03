@@ -1,4 +1,10 @@
 import type { MediaTransferHistory } from '@/types'
+import type { TabItem } from '@/components/custom-tabs'
+
+import React from 'react'
+
+import MediaDetailCard from '@/components/media-detail-card'
+import LabelValue from '@/components/LabelValue'
 
 export interface DetailModalProps {
   row: MediaTransferHistory
@@ -8,92 +14,50 @@ export interface DetailModalProps {
 export default function DetailModal({ row }: DetailModalProps) {
   const statusText = row.status ? '成功' : '失败'
 
-  return (
-    <div className="space-y-4 max-h-[75vh] overflow-y-auto">
-      <Section title="媒体信息">
-        <div className="divide-y divide-default-200">
-          <Field label="名称">
-            <span className="font-medium">{row.item.title}</span>
-            {row.item.year ? (
-              <span className="ml-2 text-foreground-500">
-                ({row.item.year})
-              </span>
-            ) : null}
-          </Field>
-          <Field label="原始名称" value={row.item.original_title} />
-          <Field label="类型" value={row.item.media_type} />
-          {row.item.media_type === 'TV' ? (
-            <Field
-              label="季/集"
-              value={`${row.item.season_str} ${row.item.episode_str}`}
-            />
-          ) : null}
+  const appendTabs: TabItem[] = [
+    {
+      key: 'path',
+      title: '路径',
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <LabelValue mono className="min-w-0" label="源路径">
+            {row.src_path}
+          </LabelValue>
+          <LabelValue mono className="min-w-0" label="目标路径">
+            {row.dst_path}
+          </LabelValue>
         </div>
-      </Section>
-
-      <Section title="路径">
-        <div className="divide-y divide-default-200">
-          <Field label="源路径">
-            <Mono>{row.src_path}</Mono>
-          </Field>
-          <Field label="目标路径">
-            <Mono>{row.dst_path}</Mono>
-          </Field>
-        </div>
-      </Section>
-
-      <Section title="状态">
-        <div className="divide-y divide-default-200">
-          <Field label="方式" value={row.transfer_type} />
-          <Field label="状态">
+      ),
+    },
+    {
+      key: 'status',
+      title: '状态',
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <LabelValue label="方式">{row.transfer_type}</LabelValue>
+          <LabelValue label="状态">
             <StatusBadge success={row.status}>{statusText}</StatusBadge>
-          </Field>
+          </LabelValue>
           {row.message ? (
-            <Field label="消息">
-              <p className="text-foreground-500 break-words leading-relaxed">
+            <LabelValue className="md:col-span-2" label="消息">
+              <span className="text-foreground-700 break-words leading-relaxed">
                 {row.message}
-              </p>
-            </Field>
+              </span>
+            </LabelValue>
           ) : null}
         </div>
-      </Section>
-    </div>
-  )
-}
+      ),
+    },
+  ]
 
-function Section({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
   return (
-    <div className="space-y-1.5">
-      <h4 className="text-sm font-semibold tracking-wide text-foreground-700">
-        {title}
-      </h4>
-      {children}
-    </div>
-  )
-}
-
-function Field({
-  label,
-  value,
-  children,
-}: {
-  label: string
-  value?: React.ReactNode
-  children?: React.ReactNode
-}) {
-  return (
-    <div className="py-2">
-      <div className="text-[11px] text-foreground-400">{label}</div>
-      <div className="mt-0.5 text-[13px] sm:text-sm break-words">
-        {value ?? children}
-      </div>
-    </div>
+    <MediaDetailCard
+      tabsScrollable
+      appendTabs={appendTabs}
+      customRule={undefined}
+      item={row.item}
+      metaRule={undefined}
+    />
   )
 }
 
@@ -110,12 +74,4 @@ function StatusBadge({
     : 'bg-danger-100 text-danger-600'
 
   return <span className={`${base} ${color}`}>{children}</span>
-}
-
-function Mono({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-xs sm:text-[13px] break-all">
-      {children}
-    </span>
-  )
 }

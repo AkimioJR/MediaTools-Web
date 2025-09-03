@@ -17,6 +17,7 @@ export interface CustomTabsProps {
   className?: string
   tabsClassName?: string
   contentClassName?: string
+  scrollable?: boolean
   variant?:
     | 'solid'
     | 'bordered'
@@ -38,6 +39,7 @@ export function CustomTabs({
   className,
   tabsClassName,
   contentClassName,
+  scrollable = false,
   variant: _variant = 'light',
   color = 'primary',
   size = 'sm',
@@ -59,10 +61,12 @@ export function CustomTabs({
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Tab Headers */}
       <div
         className={cn(
-          'flex flex-wrap gap-1 p-1 bg-default-100 rounded-lg',
+          'flex gap-1 p-1 bg-default-100 rounded-lg',
+          scrollable
+            ? 'overflow-x-auto scrollbar-hide whitespace-nowrap [-webkit-overflow-scrolling:touch]'
+            : 'flex-wrap overflow-visible',
           tabsClassName,
         )}
       >
@@ -73,7 +77,8 @@ export function CustomTabs({
             <Button
               key={item.key}
               className={cn(
-                'flex-1 min-w-0 transition-all duration-200',
+                'transition-all duration-200',
+                scrollable ? 'inline-flex' : 'flex-1 min-w-0',
                 isActive
                   ? 'bg-background shadow-sm text-foreground font-medium'
                   : 'bg-transparent text-foreground-600 hover:text-foreground hover:bg-default-200',
@@ -90,7 +95,6 @@ export function CustomTabs({
         })}
       </div>
 
-      {/* Tab Content */}
       <div className={cn('mt-4', contentClassName)}>{activeItem?.content}</div>
     </div>
   )
