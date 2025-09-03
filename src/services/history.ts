@@ -52,11 +52,11 @@ export const HistoryService = {
     },
 
     async GetMediaTransferHistories(id: number): Promise<MediaTransferHistory> {
-      return await api.get('/history/media', { params: { id } })
+      return await api.get(`/history/media/${id}`)
     },
 
     async DeleteMediaTransferHistory(id: number): Promise<void> {
-      return await api.delete(`/history/media`, { params: { id } })
+      return await api.delete(`/history/media/${id}`)
     },
   },
 }
