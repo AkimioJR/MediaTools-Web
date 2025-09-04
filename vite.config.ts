@@ -31,11 +31,6 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('react')) return 'react'
-            if (id.includes('@heroui')) return 'heroui'
-            if (id.includes('lucide-react')) return 'icons'
-            if (id.includes('zustand')) return 'zustand'
-
-            return 'vendor'
           }
         },
       },
