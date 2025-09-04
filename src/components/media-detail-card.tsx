@@ -335,7 +335,7 @@ export default function MediaDetailCard({
           </p>
         </div>
       </CardHeader>
-      <CardBody className="p-0 max-h-[60vh] md:max-h-[65vh] overflow-y-auto">
+      <CardBody className="p-0 max-h-[60vh] md:max-h-[65vh] overflow-y-auto scrollbar-hide">
         <div className="flex flex-col md:flex-row gap-4 lg:gap-6 p-4 lg:p-6">
           <div className="flex-shrink-0 flex justify-center md:justify-start">
             <div className="w-32 h-48 sm:w-40 sm:h-60 md:w-48 md:h-72 relative overflow-visible">

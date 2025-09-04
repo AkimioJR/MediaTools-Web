@@ -452,26 +452,26 @@ export default function StoragePage() {
                               </div>
                             </TableCell>
                           )
-                        case 'size':
-                          return (
-                            <TableCell className="hidden sm:table-cell">
-                              {file.size
-                                ? `${(file.size / 1024 / 1024).toFixed(1)} MB`
-                                : '-'}
-                            </TableCell>
-                          )
-                        case 'mod_time':
-                          return (
-                            <TableCell className="hidden sm:table-cell">
-                              <span className="text-xs sm:text-sm text-foreground-500">
-                                {file.mod_time
-                                  ? new Date(file.mod_time).toLocaleString(
-                                      'zh-CN',
-                                    )
-                                  : ''}
-                              </span>
-                            </TableCell>
-                          )
+                        // case 'size':
+                        //   return (
+                        //     <TableCell className="hidden sm:table-cell">
+                        //       {file.size
+                        //         ? `${(file.size / 1024 / 1024).toFixed(1)} MB`
+                        //         : '-'}
+                        //     </TableCell>
+                        //   )
+                        // case 'mod_time':
+                        //   return (
+                        //     <TableCell className="hidden sm:table-cell">
+                        //       <span className="text-xs sm:text-sm text-foreground-500">
+                        //         {file.mod_time
+                        //           ? new Date(file.mod_time).toLocaleString(
+                        //               'zh-CN',
+                        //             )
+                        //           : ''}
+                        //       </span>
+                        //     </TableCell>
+                        //   )
                         case 'actions':
                           return (
                             <TableCell width="20%">
