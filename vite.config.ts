@@ -26,10 +26,6 @@ export default defineConfig({
     },
   },
   build: {
-    sourcemap: false,
-    minify: true,
-    cssMinify: true,
-    chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
