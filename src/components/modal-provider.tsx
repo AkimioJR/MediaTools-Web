@@ -117,7 +117,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
               </p>
             )}
           </ModalHeader>
-          <ModalBody className="pb-4 px-3 pt-0 sm:pb-6 sm:px-6">
+          <ModalBody className="pb-6 pt-0">
             {renderer ? renderer(closeModal) : null}
           </ModalBody>
         </ModalContent>
