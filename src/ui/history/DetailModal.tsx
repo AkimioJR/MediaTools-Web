@@ -214,7 +214,6 @@ function PosterImage({
   return (
     <div className={containerClass}>
       <Image
-        isBlurred
         isZoomed
         alt={alt}
         className="object-cover"
