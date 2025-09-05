@@ -1,7 +1,7 @@
 import type { MediaTransferHistory } from '@/types'
 
 import { Card, CardBody } from '@heroui/card'
-import { Info } from 'lucide-react'
+import { Info, Film, Tv } from 'lucide-react'
 import {
   Table,
   TableHeader,
@@ -55,6 +55,8 @@ export default function HistoryPage() {
   const { openModal } = useModal()
   const canNext = items.length >= pageSize
   const totalPages = Math.max(1, page + (canNext ? 1 : 0))
+  const isMovie = (item: MediaTransferHistory) =>
+    item.item.media_type === 'Movie'
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -133,15 +135,24 @@ export default function HistoryPage() {
                         case 'name':
                           return (
                             <TableCell className="max-w-[24rem]">
-                              <span className="">{row.item.title}</span>
-                              <Chip
-                                className="sm:hidden ml-2"
-                                color={row.status ? 'success' : 'danger'}
-                                size="sm"
-                                variant="flat"
-                              >
-                                {row.status ? '成功' : '失败'}
-                              </Chip>
+                              <div className="flex items-center gap-2">
+                                <Icon icon={isMovie(row) ? Film : Tv} />
+                                {row.item.title}
+                                <span className="text-foreground-500">
+                                  {isMovie(row)
+                                    ? row.item.year
+                                    : row.item.season_str +
+                                      row.item.episode_str}
+                                </span>
+                                <Chip
+                                  className="sm:hidden ml-2"
+                                  color={row.status ? 'success' : 'danger'}
+                                  size="sm"
+                                  variant="flat"
+                                >
+                                  {row.status ? '成功' : '失败'}
+                                </Chip>
+                              </div>
                             </TableCell>
                           )
                         case 'path': {

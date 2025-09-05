@@ -1,5 +1,12 @@
 import type { MediaTransferHistory } from '@/types'
 
+import { useState, useEffect, useRef } from 'react'
+import { Image } from '@heroui/image'
+
+import { TMDBService } from '@/services/tmdb'
+import { cn } from '@/utils'
+import { isMo } from '@/utils/windows'
+
 export interface DetailModalProps {
   row: MediaTransferHistory
   onClose: () => void
@@ -7,29 +14,80 @@ export interface DetailModalProps {
 
 export default function DetailModal({ row }: DetailModalProps) {
   const statusText = row.status ? '成功' : '失败'
+  const [posterUrl, setPosterUrl] = useState<string>('')
+  const [posterLoading, setPosterLoading] = useState<boolean>(false)
+  const [posterError, setPosterError] = useState<boolean>(false)
+  const lastRequestedIdRef = useRef<string | null>(null)
+
+  // 获取封面图
+  useEffect(() => {
+    if (!row.item?.tmdb_id || !row.item?.media_type) return
+
+    const mediaType = String(row.item.media_type).toLowerCase()
+    const tmdbId = row.item.tmdb_id
+    const requestId = `${mediaType}-${tmdbId}`
+
+    if (lastRequestedIdRef.current === requestId) {
+      return
+    }
+    lastRequestedIdRef.current = requestId
+
+    setPosterUrl('')
+    setPosterLoading(true)
+    setPosterError(false)
+
+    TMDBService.ImageService.GetPosterImage(mediaType, tmdbId)
+      .then((url) => {
+        if (lastRequestedIdRef.current === requestId) {
+          setPosterUrl(url)
+        }
+      })
+      .catch(() => {
+        if (lastRequestedIdRef.current === requestId) {
+          setPosterError(true)
+        }
+      })
+      .finally(() => {
+        if (lastRequestedIdRef.current === requestId) {
+          setPosterLoading(false)
+        }
+      })
+  }, [row.item?.tmdb_id, row.item?.media_type])
 
   return (
-    <div className="space-y-4 max-h-[75vh] overflow-y-auto">
-      <Section title="媒体信息">
-        <div className="divide-y divide-default-200">
-          <Field label="名称">
-            <span className="font-medium">{row.item.title}</span>
-            {row.item.year ? (
-              <span className="ml-2 text-foreground-500">
-                ({row.item.year})
-              </span>
-            ) : null}
-          </Field>
-          <Field label="原始名称" value={row.item.original_title} />
-          <Field label="类型" value={row.item.media_type} />
-          {row.item.media_type === 'TV' ? (
-            <Field
-              label="季/集"
-              value={`${row.item.season_str} ${row.item.episode_str}`}
-            />
-          ) : null}
+    <div className="space-y-4 max-h-[75vh] overflow-y-auto scrollbar-hide">
+      <div className="flex gap-4">
+        <div className="flex-shrink-0">
+          <PosterImage
+            alt={row.item.title}
+            hasError={posterError}
+            isLoading={posterLoading}
+            src={posterUrl}
+          />
         </div>
-      </Section>
+        <div className="flex-1">
+          <Section title="媒体信息">
+            <div className="divide-y divide-default-200">
+              <Field label="名称">
+                <span className="font-medium">{row.item.title}</span>
+                {row.item.year ? (
+                  <span className="ml-2 text-foreground-500">
+                    ({row.item.year})
+                  </span>
+                ) : null}
+              </Field>
+              <Field label="原始名称" value={row.item.original_title} />
+              <Field label="类型" value={row.item.media_type} />
+              {row.item.media_type === 'TV' ? (
+                <Field
+                  label="季/集"
+                  value={`${row.item.season_str} ${row.item.episode_str}`}
+                />
+              ) : null}
+            </div>
+          </Section>
+        </div>
+      </div>
 
       <Section title="路径">
         <div className="divide-y divide-default-200">
@@ -117,5 +175,55 @@ function Mono({ children }: { children: React.ReactNode }) {
     <span className="font-mono text-xs sm:text-[13px] break-all">
       {children}
     </span>
+  )
+}
+
+function PosterImage({
+  src,
+  alt,
+  isLoading,
+  hasError,
+}: {
+  src: string
+  alt: string
+  isLoading: boolean
+  hasError: boolean
+}) {
+  const width = isMo ? 128 : 192
+  const height = isMo ? 192 : 288
+  const containerClass = 'w-32 h-48 sm:w-48 sm:h-72'
+
+  // 错误状态或无封面状态
+  if (hasError || (!src && !isLoading)) {
+    const message = hasError ? '封面加载失败' : '暂无封面'
+
+    return (
+      <div
+        className={cn(
+          containerClass,
+          'bg-default-100 rounded-lg flex items-center justify-center',
+        )}
+      >
+        <div className="text-center text-default-400">
+          <div className="text-xs">{message}</div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={containerClass}>
+      <Image
+        isBlurred
+        isZoomed
+        alt={alt}
+        className="object-cover"
+        height={height}
+        isLoading={isLoading}
+        radius="lg"
+        src={src}
+        width={width}
+      />
+    </div>
   )
 }
