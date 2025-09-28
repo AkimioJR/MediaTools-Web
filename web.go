@@ -25,3 +25,7 @@ func getFileData(path string) []byte {
 func GetIconData() []byte {
 	return getFileData("dist/favicon.ico")
 }
+
+func GetLogoSVGData() []byte {
+	return getFileData("dist/logo.svg")
+}
