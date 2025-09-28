@@ -7,7 +7,8 @@
     "dev": "vite --host",
     "build": "tsc && vite build",
     "lint": "eslint --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen-icon": "magick web/public/logo.svg \\( -clone 0 -resize 16x16 \\) \\( -clone 0 -resize 32x32 \\) \\( -clone 0 -resize 48x48 \\) \\( -clone 0 -resize 64x64 \\) \\( -clone 0 -resize 128x128 \\) \\( -clone 0 -resize 256x256 \\) \\( -clone 0 -resize 512x512 \\) \\( -clone 0 -resize 1024x1024 \\) -delete 0 web/public/favicon.ico"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
