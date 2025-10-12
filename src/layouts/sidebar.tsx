@@ -5,7 +5,6 @@ import { useAppStore } from '@/stores/useAppStore'
 import { cn } from '@/utils/twUtils'
 import { SidebarMenus } from '@/components/sidebar-menus'
 import { Icon } from '@/components/icon'
-
 import { versionService } from '@/services'
 
 export function Sidebar() {
@@ -16,6 +15,7 @@ export function Sidebar() {
     const loadVersion = async () => {
       try {
         const versionInfo = await versionService.getVersionInfo()
+
         setAppVersion(versionInfo.app_version)
       } catch (error) {
         console.error('Failed to load version info:', error)
@@ -32,6 +32,7 @@ export function Sidebar() {
         'fixed inset-y-0 left-0 z-50 hidden w-64 transform border-r border-divider bg-background transition-transform duration-300 ease-in-out md:block',
         isOpenSidebar ? 'translate-x-0' : '-translate-x-full',
       )}
+      style={{ '--wails-draggable': 'drag', cursor: 'default' }}
     >
       <div className="flex h-full flex-col px-2">
         <div className="p-4">

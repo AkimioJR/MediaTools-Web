@@ -33,7 +33,13 @@ export function NavBar() {
   }
 
   return (
-    <Navbar isBordered className="" maxWidth="full" position="sticky">
+    <Navbar
+      isBordered
+      className=""
+      maxWidth="full"
+      position="sticky"
+      style={{ '--wails-draggable': 'drag', cursor: 'default' }}
+    >
       <NavbarBrand>
         {/* 移动端菜单按钮 */}
         <Button
