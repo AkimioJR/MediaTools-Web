@@ -1,12 +1,30 @@
 import { Wand2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { useAppStore } from '@/stores/useAppStore'
 import { cn } from '@/utils/twUtils'
 import { SidebarMenus } from '@/components/sidebar-menus'
 import { Icon } from '@/components/icon'
 
+import { versionService } from '@/services'
+
 export function Sidebar() {
   const { isOpenSidebar } = useAppStore()
+  const [appVersion, setAppVersion] = useState<string>('Loading...')
+
+  useEffect(() => {
+    const loadVersion = async () => {
+      try {
+        const versionInfo = await versionService.getVersionInfo()
+        setAppVersion(versionInfo.app_version)
+      } catch (error) {
+        console.error('Failed to load version info:', error)
+        setAppVersion('Unknown')
+      }
+    }
+
+    loadVersion()
+  }, [])
 
   return (
     <section
@@ -23,7 +41,7 @@ export function Sidebar() {
             </div>
             <div>
               <h2 className="font-semibold">MediaTools</h2>
-              <p className="text-xs">v0.0.1</p>
+              <p className="text-xs">{appVersion}</p>
             </div>
           </div>
         </div>
