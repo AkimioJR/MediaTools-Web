@@ -11,9 +11,11 @@ import { useModal } from '@/components/modal-provider'
 import { useAppStore } from '@/stores/useAppStore'
 import { siteConfig } from '@/config/site'
 import { TaskList } from '@/ui/nav_bar/TaskList'
+import { cn } from '@/utils'
 
 export function NavBar() {
-  const { switchSidebar, isOpenSidebar, switchMobileDrawer } = useAppStore()
+  const { switchSidebar, isOpenSidebar, switchMobileDrawer, isDesktopMode } =
+    useAppStore()
   const { openModal } = useModal()
   const location = useLocation()
 
@@ -36,9 +38,14 @@ export function NavBar() {
     <Navbar
       isBordered
       className=""
+      height={isDesktopMode ? 'auto' : undefined}
       maxWidth="full"
       position="sticky"
-      style={{ '--wails-draggable': 'drag', cursor: 'default' }}
+      style={{
+        '--wails-draggable': 'drag',
+        cursor: 'default',
+        paddingTop: isDesktopMode ? '17px' : '',
+      }}
     >
       <NavbarBrand>
         {/* 移动端菜单按钮 */}
@@ -55,7 +62,9 @@ export function NavBar() {
         {/* PC端侧边栏切换按钮 */}
         <Button
           isIconOnly
-          className="mr-2 hidden md:flex"
+          className={cn('mr-2 hidden md:flex', {
+            'ml-12': isDesktopMode && !isOpenSidebar,
+          })}
           size="sm"
           variant="light"
           onPress={switchSidebar}

@@ -2,6 +2,11 @@
 
 @config "../../tailwind.config.js";
 
+html,
+body {
+  background-color: transparent;
+}
+
 /* 隐藏滚动条但保持滚动功能 */
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
