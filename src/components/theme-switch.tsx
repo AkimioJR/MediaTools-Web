@@ -5,6 +5,8 @@ import { Sun, Moon, Monitor } from 'lucide-react'
 
 import { HeaderIcon } from '@/components/icon'
 
+import { useAppStore } from '@/stores/useAppStore'
+
 export interface ThemeSwitchProps {
   className?: string
 }
@@ -16,6 +18,8 @@ export function ThemeSwitch({ className }: ThemeSwitchProps) {
   const [themeMode, setThemeMode] = useState<ThemeMode>('system')
 
   const { setTheme } = useTheme()
+
+  const { systemInfo } = useAppStore()
 
   // 检测系统主题
   const getSystemTheme = (): 'light' | 'dark' => {
@@ -32,8 +36,20 @@ export function ThemeSwitch({ className }: ThemeSwitchProps) {
   const applyTheme = (mode: ThemeMode) => {
     if (mode === 'system') {
       setTheme(getSystemTheme())
+      if (systemInfo.desktop_mode) {
+        window?.runtime?.WindowSetSystemDefaultTheme()
+      }
     } else {
       setTheme(mode)
+      if (mode === 'light') {
+        if (systemInfo.desktop_mode) {
+          window?.runtime?.WindowSetLightTheme()
+        }
+      } else {
+        if (systemInfo.desktop_mode) {
+          window?.runtime?.WindowSetDarkTheme()
+        }
+      }
     }
   }
 
