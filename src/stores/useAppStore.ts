@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 
-import { StorageService } from '@/services/storage'
-import { configService } from '@/services/config'
+import { StorageService, configService, runtimeService } from '@/services'
 import { LibraryConfig, StorageProviderInterface } from '@/types'
 
 type AppState = {
@@ -12,7 +11,7 @@ type AppState = {
   mediaLibraries: LibraryConfig[]
   loadProviders: () => Promise<void>
   loadMediaLibraries: () => Promise<void>
-  loadAppStatus: () => void
+  loadAppStatus: () => Promise<void>
   switchSidebar: () => void
   switchMobileDrawer: () => void
   closeMobileDrawer: () => void
@@ -35,8 +34,9 @@ export const useAppStore = create<AppState>((set) => ({
       mediaLibraries: await configService.getMediaLibrariesConfig(),
     })
   },
-  loadAppStatus: () => {
-    const isDesktopMode = Boolean(window?.runtime)
+  loadAppStatus: async () => {
+    const statusInfo = await runtimeService.getRuntimeAppStatusInfo()
+    const isDesktopMode = statusInfo.desktop_mode
 
     set({ isDesktopMode })
   },
