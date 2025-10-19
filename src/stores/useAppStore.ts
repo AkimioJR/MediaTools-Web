@@ -1,17 +1,22 @@
 import { create } from 'zustand'
 
 import { StorageService, configService, runtimeService } from '@/services'
-import { LibraryConfig, StorageProviderInterface } from '@/types'
+import {
+  LibraryConfig,
+  RuntimeAppStatusInfo,
+  StorageProviderInterface,
+} from '@/types'
 
 type AppState = {
   isOpenSidebar: boolean
-  isDesktopMode: boolean
+  isNeedFitStyleOs: boolean
   isOpenMobileDrawer: boolean
   providers: StorageProviderInterface[]
   mediaLibraries: LibraryConfig[]
+  systemInfo: RuntimeAppStatusInfo
   loadProviders: () => Promise<void>
   loadMediaLibraries: () => Promise<void>
-  loadAppStatus: () => Promise<void>
+  loadAppInfo: () => Promise<void>
   switchSidebar: () => void
   switchMobileDrawer: () => void
   closeMobileDrawer: () => void
@@ -19,10 +24,18 @@ type AppState = {
 
 export const useAppStore = create<AppState>((set) => ({
   isOpenSidebar: true,
-  isDesktopMode: false,
+  isNeedFitStyleOs: false,
   isOpenMobileDrawer: false,
   providers: [],
   mediaLibraries: [],
+  systemInfo: {
+    desktop_mode: false,
+    is_dev: false,
+    port: 0,
+    boot_time: '',
+    os: '',
+    arch: '',
+  },
   switchSidebar: () => set((s) => ({ isOpenSidebar: !s.isOpenSidebar })),
   switchMobileDrawer: () =>
     set((s) => ({ isOpenMobileDrawer: !s.isOpenMobileDrawer })),
@@ -34,10 +47,13 @@ export const useAppStore = create<AppState>((set) => ({
       mediaLibraries: await configService.getMediaLibrariesConfig(),
     })
   },
-  loadAppStatus: async () => {
-    const statusInfo = await runtimeService.getRuntimeAppStatusInfo()
-    const isDesktopMode = statusInfo.desktop_mode
+  loadAppInfo: async () => {
+    const info = await runtimeService.getRuntimeAppStatusInfo()
+    const { os, desktop_mode } = info
 
-    set({ isDesktopMode })
+    const isNeedFitStyleOs =
+      desktop_mode && (os === 'windows' || os === 'darwin')
+
+    set({ isNeedFitStyleOs, systemInfo: info })
   },
 }))

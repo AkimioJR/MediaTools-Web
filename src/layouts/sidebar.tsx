@@ -8,7 +8,7 @@ import { Icon } from '@/components/icon'
 import { versionService } from '@/services'
 
 export function Sidebar() {
-  const { isOpenSidebar, isDesktopMode } = useAppStore()
+  const { isOpenSidebar, isNeedFitStyleOs } = useAppStore()
   const [appVersion, setAppVersion] = useState<string>('Loading...')
 
   useEffect(() => {
@@ -31,12 +31,12 @@ export function Sidebar() {
       className={cn(
         'fixed inset-y-0 left-0 z-50 hidden w-64 transform border-r border-divider bg-transparent transition-transform duration-300 ease-in-out md:block',
         isOpenSidebar ? 'translate-x-0' : '-translate-x-full',
-        { 'border-transparent': isDesktopMode },
+        { 'border-transparent': isNeedFitStyleOs },
       )}
       style={{ '--wails-draggable': 'drag', cursor: 'default' }}
     >
       <div className="flex h-full flex-col px-2">
-        <div className={cn('p-4', { 'pt-6': isDesktopMode })}>
+        <div className={cn('p-4', { 'pt-6': isNeedFitStyleOs })}>
           <div className="flex items-center gap-3">
             <div className="flex aspect-square size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 text-white">
               <Icon color="inherit" icon={Wand2} size="md" />
