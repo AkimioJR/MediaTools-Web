@@ -48,19 +48,26 @@ export function NavBar() {
   }
 
   const isWindows = systemInfo.os === 'windows' && systemInfo.desktop_mode
-
+  let isFullscreen = false
   const btnContext = [
     {
       icon: Minus,
-      onClick: () => window?.runtime?.WindowMinimise(),
+      onClick: () => window.runtime.WindowMinimise(),
     },
     {
       icon: Maximize,
-      onClick: () => window?.runtime?.WindowSetMaxSize(),
+      onClick: () => {
+        if (isFullscreen) {
+          window.runtime.WindowUnfullscreen()
+        } else {
+          window.runtime.WindowFullscreen()
+        }
+        isFullscreen = !isFullscreen
+      },
     },
     {
       icon: X,
-      onClick: () => window?.runtime?.WindowHide(),
+      onClick: () => window.runtime.WindowHide(),
     },
   ]
 
